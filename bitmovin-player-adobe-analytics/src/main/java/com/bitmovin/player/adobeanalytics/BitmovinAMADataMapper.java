@@ -3,6 +3,8 @@ package com.bitmovin.player.adobeanalytics;
 import com.adobe.marketing.mobile.Media;
 import com.adobe.marketing.mobile.Media.MediaType;
 
+import java.util.HashMap;
+
 public class BitmovinAMADataMapper {
 
     class AdobeMediaObject {
@@ -83,9 +85,13 @@ public class BitmovinAMADataMapper {
         }
     }
 
-    public AdobeMediaObject createMediaObject (String name, String id, Double length, String streamType) {
-        AdobeMediaObject obj = new AdobeMediaObject (name, id, length, streamType);
-        return obj;
+    public HashMap<String, Object> createMediaObject (String name, String id, Double length, String streamType) {
+        // AdobeMediaObject obj = new AdobeMediaObject (name, id, length, streamType);
+        return Media.createMediaObject(name,
+                id,
+                length,
+                streamType,
+                MediaType.Video);
     }
 
     public AdobeAdBreakObject createAdBreakObject (String name, Long position, Double startTime) {

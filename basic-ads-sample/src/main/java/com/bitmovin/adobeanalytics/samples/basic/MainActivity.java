@@ -1,4 +1,4 @@
-package com.bitmovin.adobeanalytics.samples.basic;
+package com.bitmovin.player.adobeanalytics.samples.basic;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +12,8 @@ import com.bitmovin.player.config.advertising.AdSourceType;
 import com.bitmovin.player.config.advertising.AdvertisingConfiguration;
 import com.bitmovin.player.config.media.SourceConfiguration;
 
+import com.bitmovin.player.adobeanalytics.BitmovinAMAImpl;
+
 import com.adobe.marketing.mobile.*;
 
 public class MainActivity extends AppCompatActivity
@@ -20,6 +22,7 @@ public class MainActivity extends AppCompatActivity
     private static final String VMAP_AD_SOURCE = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostlongpod&cmsid=496&vid=short_tencue&correlator=";
 
     private BitmovinPlayerView bitmovinPlayerView;
+    private BitmovinAMAImpl bitmovinAmaObj;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -58,6 +61,8 @@ public class MainActivity extends AppCompatActivity
 
         // Add BitmovinPlayerView to the layout
         rootView.addView(this.bitmovinPlayerView, 0);
+
+        this.bitmovinAmaObj = new BitmovinAMAImpl(bitmovinPlayerView.getPlayer());
     }
 
     @Override
