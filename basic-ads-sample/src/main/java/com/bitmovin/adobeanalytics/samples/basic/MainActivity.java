@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity
         playerConfiguration.setSourceConfiguration(sourceConfiguration);
         // Assing the AdvertisingConfiguration to the PlayerConfiguration
         // All ads in the AdvertisingConfiguration will be scheduled automatically
-        playerConfiguration.setAdvertisingConfiguration(advertisingConfiguration);
+        // playerConfiguration.setAdvertisingConfiguration(advertisingConfiguration);
 
         // Create new BitmovinPlayerView with our PlayerConfiguration
         this.bitmovinPlayerView = new BitmovinPlayerView(this, playerConfiguration);

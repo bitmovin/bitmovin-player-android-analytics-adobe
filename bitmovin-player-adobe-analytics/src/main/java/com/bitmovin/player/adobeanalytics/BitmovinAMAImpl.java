@@ -6,11 +6,17 @@ import com.adobe.marketing.mobile.Media;
 import com.adobe.marketing.mobile.MediaConstants;
 import com.adobe.marketing.mobile.MediaTracker;
 import com.bitmovin.player.BitmovinPlayer;
+import com.bitmovin.player.api.event.data.DestroyEvent;
+import com.bitmovin.player.api.event.data.ErrorEvent;
+import com.bitmovin.player.api.event.data.PausedEvent;
 import com.bitmovin.player.api.event.data.PlayEvent;
 import com.bitmovin.player.api.event.data.PlaybackFinishedEvent;
 import com.bitmovin.player.api.event.data.PlayingEvent;
 import com.bitmovin.player.api.event.data.ReadyEvent;
+import com.bitmovin.player.api.event.data.SeekEvent;
+import com.bitmovin.player.api.event.data.SeekedEvent;
 import com.bitmovin.player.api.event.data.SourceLoadedEvent;
+import com.bitmovin.player.api.event.data.SourceUnloadedEvent;
 
 import java.util.HashMap;
 
@@ -25,7 +31,9 @@ public class BitmovinAMAImpl {
     private BitmovinAMADataMapper amaDataMapperObject;
 
     private class PlayerPlayerEventHandler implements BitmovinPlayerEventsWrapper.SourceLoadedCB, BitmovinPlayerEventsWrapper.ReadyCB,
-            BitmovinPlayerEventsWrapper.PlayCB,  BitmovinPlayerEventsWrapper.PlayingCB, BitmovinPlayerEventsWrapper.PlaybackFinishedCB {
+            BitmovinPlayerEventsWrapper.PlayCB,  BitmovinPlayerEventsWrapper.PlayingCB, BitmovinPlayerEventsWrapper.PausedCB,
+            BitmovinPlayerEventsWrapper.SeekStartedCB, BitmovinPlayerEventsWrapper.SeekEndedCB, BitmovinPlayerEventsWrapper.PlaybackFinishedCB,
+            BitmovinPlayerEventsWrapper.ErrorCB, BitmovinPlayerEventsWrapper.SourceUnloadedCB, BitmovinPlayerEventsWrapper.PlayerDestroyedCB {
 
         private BitmovinPlayer bitmovinPlayer;
 
@@ -52,11 +60,14 @@ public class BitmovinAMAImpl {
         @Override
         public void onPlay(PlayEvent event) {
             Log.d(TAG, "onPlayCB");
+
         }
 
         @Override
         public void onPlaying(PlayingEvent event) {
             Log.d(TAG, "onPlayingCB");
+
+            bitmovinAdobeEventsObj.trackPlay();
         }
 
         @Override
@@ -64,6 +75,41 @@ public class BitmovinAMAImpl {
             Log.d(TAG, "onPlaybackFinishedCB");
 
             bitmovinAdobeEventsObj.trackComplete();
+            bitmovinAdobeEventsObj.trackSessionEnd();
+        }
+
+        @Override
+        public void onPaused(PausedEvent event) {
+            Log.d(TAG, "onPaused");
+
+            bitmovinAdobeEventsObj.trackPause();
+        }
+
+        @Override
+        public void onSeekStarted(SeekEvent event) {
+            Log.d(TAG, "onSeekStarted");
+        }
+
+        @Override
+        public void onSeekEnded(SeekedEvent event) {
+            Log.d(TAG, "onSeekEnded");
+        }
+
+        @Override
+        public void onError(ErrorEvent event) {
+            Log.d(TAG, "onError");
+
+            bitmovinAdobeEventsObj.trackError(event.getMessage());
+        }
+
+        @Override
+        public void onSourceUnloaded(SourceUnloadedEvent event) {
+            Log.d(TAG, "onSourceUnloaded");
+        }
+
+        @Override
+        public void onPlayerDestroyed(DestroyEvent event) {
+            Log.d(TAG, "onPlayerDestroyed");
             bitmovinAdobeEventsObj.trackSessionEnd();
         }
     }
@@ -85,16 +131,20 @@ public class BitmovinAMAImpl {
 
         this.bitmovinPlayerEventHandler = new PlayerPlayerEventHandler(this.bitmovinPlayer);
 
-        this.bitmovinPlayerEventsObj.addUpstreamCallback((BitmovinPlayerEventsWrapper.SourceLoadedCB)this.bitmovinPlayerEventHandler);
-        //this.bitmovinPlayerEventsObj.addUpstreamCallback((BitmovinPlayerEventsWrapper.ReadyCB)this.bitmovinPlayerEventHandler);
-        //this.bitmovinPlayerEventsObj.addUpstreamCallback((BitmovinPlayerEventsWrapper.PlayCB)this.bitmovinPlayerEventHandler);
-        //this.bitmovinPlayerEventsObj.addUpstreamCallback((BitmovinPlayerEventsWrapper.PlayingCB)this.bitmovinPlayerEventHandler);
-        //this.bitmovinPlayerEventsObj.addUpstreamCallback((BitmovinPlayerEventsWrapper.PlaybackFinishedCB)this.bitmovinPlayerEventHandler);
-
+        this.bitmovinPlayerEventsObj.addUpstreamCallback(BitmovinPlayerEventsWrapper.SOURCE_LOADED_EVENT, this.bitmovinPlayerEventHandler);
+        this.bitmovinPlayerEventsObj.addUpstreamCallback(BitmovinPlayerEventsWrapper.READY_EVENT, this.bitmovinPlayerEventHandler);
+        this.bitmovinPlayerEventsObj.addUpstreamCallback(BitmovinPlayerEventsWrapper.PLAY_EVENT, this.bitmovinPlayerEventHandler);
+        this.bitmovinPlayerEventsObj.addUpstreamCallback(BitmovinPlayerEventsWrapper.PLAYING_EVENT, this.bitmovinPlayerEventHandler);
+        this.bitmovinPlayerEventsObj.addUpstreamCallback(BitmovinPlayerEventsWrapper.PAUSED_EVENT, this.bitmovinPlayerEventHandler);
+        this.bitmovinPlayerEventsObj.addUpstreamCallback(BitmovinPlayerEventsWrapper.SEEK_EVENT, this.bitmovinPlayerEventHandler);
+        this.bitmovinPlayerEventsObj.addUpstreamCallback(BitmovinPlayerEventsWrapper.SEEKED_EVENT, this.bitmovinPlayerEventHandler);
+        this.bitmovinPlayerEventsObj.addUpstreamCallback(BitmovinPlayerEventsWrapper.PLAYBACK_FINISHED_EVENT, this.bitmovinPlayerEventHandler);
+        this.bitmovinPlayerEventsObj.addUpstreamCallback(BitmovinPlayerEventsWrapper.ERROR_EVENT, this.bitmovinPlayerEventHandler);
+        this.bitmovinPlayerEventsObj.addUpstreamCallback(BitmovinPlayerEventsWrapper.SOURCE_UNLOADED_EVENT, this.bitmovinPlayerEventHandler);
+        this.bitmovinPlayerEventsObj.addUpstreamCallback(BitmovinPlayerEventsWrapper.PLAYER_DESTROYED_EVENT, this.bitmovinPlayerEventHandler);
     }
 
     public void destroyTracker() {
-        bitmovinAdobeEventsObj.trackSessionEnd();
         bitmovinPlayerEventsObj.removeListeners();
     }
 

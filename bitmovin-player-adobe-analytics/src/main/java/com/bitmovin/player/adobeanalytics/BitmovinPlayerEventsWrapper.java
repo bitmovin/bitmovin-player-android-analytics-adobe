@@ -55,8 +55,27 @@ import java.util.Map;
 public class BitmovinPlayerEventsWrapper {
 
     private BitmovinPlayer bitmovinPlayer;
-    private Map<Class, Object> bitmovinEventsMap = new HashMap<Class, Object>();
+    private Map<String, UpstreamCallback> bitmovinEventsMap = new HashMap<String, UpstreamCallback>();
     private final String TAG = "BitmovinEventsWrapper";
+
+    public static final String SOURCE_LOADED_EVENT = "sourceloaded";
+    public static final String READY_EVENT = "ready";
+    public static final String PLAY_EVENT = "play";
+    public static final String PLAYING_EVENT = "playing";
+    public static final String PAUSED_EVENT = "paused";
+    public static final String SEEK_EVENT = "seek";
+    public static final String SEEKED_EVENT = "seeked";
+    public static final String BUFFERING_STARTED_EVENT = "stallstarted";
+    public static final String BUFFERING_ENDED_EVENT = "stallended";
+    public static final String ERROR_EVENT = "error";
+    public static final String PLAYBACK_FINISHED_EVENT = "playbackfinished";
+    public static final String SOURCE_UNLOADED_EVENT = "sourceunloaded";
+    public static final String PLAYER_DESTROYED_EVENT = "destroyed";
+    public static final String AD_BREAK_STARTED = "adbreakstarted";
+    public static final String AD_BREAK_FINISHED = "adbreakfinished";
+    public static final String AD_STARTED = "adstarted";
+    public static final String AD_FINISHED = "adfinished";
+    public static final String AD_ERROR = "aderror";
 
     BitmovinPlayerEventsWrapper (BitmovinPlayer player) {
         this.bitmovinPlayer = player;
@@ -136,12 +155,20 @@ public class BitmovinPlayerEventsWrapper {
         void onAdError (AdErrorEvent event);
     }
 
-    private class onSourceLoadedListener implements OnSourceLoadedListener {
+    private interface UpstreamCallback {
+        public void on (Object callback);
+        public void off ();
+    }
+
+    private class onSourceLoadedListener implements OnSourceLoadedListener, UpstreamCallback {
 
         private SourceLoadedCB upstreamCB = null;
-        public void on (SourceLoadedCB callback) {
-            upstreamCB = callback;
+
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (SourceLoadedCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -156,12 +183,14 @@ public class BitmovinPlayerEventsWrapper {
 
     }
 
-    private class onReadyListener implements OnReadyListener {
+    private class onReadyListener implements OnReadyListener, UpstreamCallback {
 
         private ReadyCB upstreamCB = null;
-        public void on (ReadyCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (ReadyCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -175,12 +204,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onPlayListener implements OnPlayListener {
+    private class onPlayListener implements OnPlayListener, UpstreamCallback {
 
         private PlayCB upstreamCB = null;
-        public void on (PlayCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (PlayCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -194,12 +225,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onPlayingListener implements OnPlayingListener {
+    private class onPlayingListener implements OnPlayingListener, UpstreamCallback {
 
         private PlayingCB upstreamCB = null;
-        public void on (PlayingCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (PlayingCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -213,12 +246,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onPausedListener implements OnPausedListener {
+    private class onPausedListener implements OnPausedListener, UpstreamCallback {
 
         private PausedCB upstreamCB = null;
-        public void on (PausedCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (PausedCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -232,12 +267,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onSeekListener implements OnSeekListener {
+    private class onSeekListener implements OnSeekListener, UpstreamCallback {
 
         private SeekStartedCB upstreamCB = null;
-        public void on (SeekStartedCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (SeekStartedCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -251,12 +288,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onSeekedListener implements OnSeekedListener {
+    private class onSeekedListener implements OnSeekedListener, UpstreamCallback {
 
         private SeekEndedCB upstreamCB = null;
-        public void on (SeekEndedCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (SeekEndedCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -270,12 +309,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onStallStartedListener implements OnStallStartedListener {
+    private class onStallStartedListener implements OnStallStartedListener, UpstreamCallback {
 
         private BufferingStartedCB upstreamCB = null;
-        public void on (BufferingStartedCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (BufferingStartedCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -289,12 +330,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onStallEndedListener implements OnStallEndedListener {
+    private class onStallEndedListener implements OnStallEndedListener, UpstreamCallback {
 
         private BufferingEndedCB upstreamCB = null;
-        public void on (BufferingEndedCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (BufferingEndedCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -308,12 +351,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onSourceUnloadedListener implements OnSourceUnloadedListener {
+    private class onSourceUnloadedListener implements OnSourceUnloadedListener, UpstreamCallback {
 
         private SourceUnloadedCB upstreamCB = null;
-        public void on (SourceUnloadedCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (SourceUnloadedCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -327,12 +372,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onErrorListener implements OnErrorListener {
+    private class onErrorListener implements OnErrorListener, UpstreamCallback {
 
         private ErrorCB upstreamCB = null;
-        public void on (ErrorCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (ErrorCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -346,12 +393,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onPlaybackFinishedListener implements OnPlaybackFinishedListener {
+    private class onPlaybackFinishedListener implements OnPlaybackFinishedListener, UpstreamCallback {
 
         private PlaybackFinishedCB upstreamCB = null;
-        public void on (PlaybackFinishedCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (PlaybackFinishedCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -365,12 +414,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onDestroyListener implements OnDestroyListener {
+    private class onDestroyListener implements OnDestroyListener, UpstreamCallback {
 
         private PlayerDestroyedCB upstreamCB = null;
-        public void on (PlayerDestroyedCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (PlayerDestroyedCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -384,12 +435,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onAdBreakStartedListener implements OnAdBreakStartedListener {
+    private class onAdBreakStartedListener implements OnAdBreakStartedListener, UpstreamCallback {
 
         private AdBreakStartedCB upstreamCB = null;
-        public void on (AdBreakStartedCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (AdBreakStartedCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -403,12 +456,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onAdBreakFinishedListener implements OnAdBreakFinishedListener {
+    private class onAdBreakFinishedListener implements OnAdBreakFinishedListener, UpstreamCallback {
 
         private AdBreakFinishedCB upstreamCB = null;
-        public void on (AdBreakFinishedCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (AdBreakFinishedCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -422,12 +477,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onAdStartedListener implements OnAdStartedListener {
+    private class onAdStartedListener implements OnAdStartedListener, UpstreamCallback {
 
         private AdStartedCB upstreamCB = null;
-        public void on (AdStartedCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (AdStartedCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -441,12 +498,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onAdFinishedListener implements OnAdFinishedListener {
+    private class onAdFinishedListener implements OnAdFinishedListener, UpstreamCallback {
 
         private AdFinishedCB upstreamCB = null;
-        public void on (AdFinishedCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (AdFinishedCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -460,12 +519,14 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onAdErrorListener implements OnAdErrorListener {
+    private class onAdErrorListener implements OnAdErrorListener, UpstreamCallback {
 
         private AdErrorCB upstreamCB = null;
-        public void on (AdErrorCB callback) {
-            upstreamCB = callback;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (AdErrorCB)callback;
         }
+        @Override
         public void off () {
             upstreamCB = null;
         }
@@ -480,59 +541,59 @@ public class BitmovinPlayerEventsWrapper {
     }
 
     private void registerListeners() {
-        this.bitmovinEventsMap.put(SourceLoadedCB.class, new onSourceLoadedListener());
-        this.bitmovinPlayer.addEventListener((OnSourceLoadedListener)bitmovinEventsMap.get(SourceLoadedCB.class));
+        this.bitmovinEventsMap.put(SOURCE_LOADED_EVENT, new onSourceLoadedListener());
+        this.bitmovinPlayer.addEventListener((OnSourceLoadedListener)bitmovinEventsMap.get(SOURCE_LOADED_EVENT));
 
-        this.bitmovinEventsMap.put(ReadyCB.class, new onReadyListener());
-        this.bitmovinPlayer.addEventListener((OnReadyListener)bitmovinEventsMap.get(ReadyCB.class));
+        this.bitmovinEventsMap.put(READY_EVENT, new onReadyListener());
+        this.bitmovinPlayer.addEventListener((OnReadyListener)bitmovinEventsMap.get(READY_EVENT));
 
-        this.bitmovinEventsMap.put(PlayCB.class, new onPlayListener());
-        this.bitmovinPlayer.addEventListener((OnPlayListener)bitmovinEventsMap.get(PlayCB.class));
+        this.bitmovinEventsMap.put(PLAY_EVENT, new onPlayListener());
+        this.bitmovinPlayer.addEventListener((OnPlayListener)bitmovinEventsMap.get(PLAY_EVENT));
 
-        this.bitmovinEventsMap.put(PlayingCB.class, new onPlayingListener());
-        this.bitmovinPlayer.addEventListener((OnPlayingListener)bitmovinEventsMap.get(PlayingCB.class));
+        this.bitmovinEventsMap.put(PLAYING_EVENT, new onPlayingListener());
+        this.bitmovinPlayer.addEventListener((OnPlayingListener)bitmovinEventsMap.get(PLAYING_EVENT));
 
-        this.bitmovinEventsMap.put(PausedCB.class, new onPausedListener());
-        this.bitmovinPlayer.addEventListener((OnPausedListener)bitmovinEventsMap.get(PausedCB.class));
+        this.bitmovinEventsMap.put(PAUSED_EVENT, new onPausedListener());
+        this.bitmovinPlayer.addEventListener((OnPausedListener)bitmovinEventsMap.get(PAUSED_EVENT));
 
-        this.bitmovinEventsMap.put(SeekStartedCB.class, new onSeekListener());
-        bitmovinPlayer.addEventListener((OnSeekListener)bitmovinEventsMap.get(SeekStartedCB.class));
+        this.bitmovinEventsMap.put(SEEK_EVENT, new onSeekListener());
+        bitmovinPlayer.addEventListener((OnSeekListener)bitmovinEventsMap.get(SEEK_EVENT));
 
-        bitmovinEventsMap.put(SeekEndedCB.class, new onSeekedListener());
-        bitmovinPlayer.addEventListener((OnSeekedListener)bitmovinEventsMap.get(SeekEndedCB.class));
+        bitmovinEventsMap.put(SEEKED_EVENT, new onSeekedListener());
+        bitmovinPlayer.addEventListener((OnSeekedListener)bitmovinEventsMap.get(SEEKED_EVENT));
 
-        bitmovinEventsMap.put(BufferingStartedCB.class, new onStallStartedListener());
-        bitmovinPlayer.addEventListener((OnStallStartedListener)bitmovinEventsMap.get(BufferingStartedCB.class));
+        bitmovinEventsMap.put(BUFFERING_STARTED_EVENT, new onStallStartedListener());
+        bitmovinPlayer.addEventListener((OnStallStartedListener)bitmovinEventsMap.get(BUFFERING_STARTED_EVENT));
 
-        bitmovinEventsMap.put(BufferingEndedCB.class, new onStallEndedListener());
-        bitmovinPlayer.addEventListener((OnStallEndedListener)bitmovinEventsMap.get(BufferingEndedCB.class));
+        bitmovinEventsMap.put(BUFFERING_ENDED_EVENT, new onStallEndedListener());
+        bitmovinPlayer.addEventListener((OnStallEndedListener)bitmovinEventsMap.get(BUFFERING_ENDED_EVENT));
 
-        bitmovinEventsMap.put(SourceUnloadedCB.class, new onSourceUnloadedListener());
-        bitmovinPlayer.addEventListener((OnSourceUnloadedListener)bitmovinEventsMap.get(SourceUnloadedCB.class));
+        bitmovinEventsMap.put(SOURCE_UNLOADED_EVENT, new onSourceUnloadedListener());
+        bitmovinPlayer.addEventListener((OnSourceUnloadedListener)bitmovinEventsMap.get(SOURCE_UNLOADED_EVENT));
 
-        bitmovinEventsMap.put(ErrorCB.class, new onErrorListener());
-        bitmovinPlayer.addEventListener((OnErrorListener)bitmovinEventsMap.get(ErrorCB.class));
+        bitmovinEventsMap.put(ERROR_EVENT, new onErrorListener());
+        bitmovinPlayer.addEventListener((OnErrorListener)bitmovinEventsMap.get(ERROR_EVENT));
 
-        bitmovinEventsMap.put(PlaybackFinishedCB.class, new onPlaybackFinishedListener());
-        bitmovinPlayer.addEventListener((OnPlaybackFinishedListener)bitmovinEventsMap.get(PlaybackFinishedCB.class));
+        bitmovinEventsMap.put(PLAYBACK_FINISHED_EVENT, new onPlaybackFinishedListener());
+        bitmovinPlayer.addEventListener((OnPlaybackFinishedListener)bitmovinEventsMap.get(PLAYBACK_FINISHED_EVENT));
 
-        bitmovinEventsMap.put(PlayerDestroyedCB.class, new onDestroyListener());
-        bitmovinPlayer.addEventListener((OnDestroyListener)bitmovinEventsMap.get(PlayerDestroyedCB.class));
+        bitmovinEventsMap.put(PLAYER_DESTROYED_EVENT, new onDestroyListener());
+        bitmovinPlayer.addEventListener((OnDestroyListener)bitmovinEventsMap.get(PLAYER_DESTROYED_EVENT));
 
-        bitmovinEventsMap.put(AdBreakStartedCB.class, new onAdBreakStartedListener());
-        bitmovinPlayer.addEventListener((OnAdBreakStartedListener)bitmovinEventsMap.get(AdBreakStartedCB.class));
+        bitmovinEventsMap.put(AD_BREAK_STARTED, new onAdBreakStartedListener());
+        bitmovinPlayer.addEventListener((OnAdBreakStartedListener)bitmovinEventsMap.get(AD_BREAK_STARTED));
 
-        bitmovinEventsMap.put(AdBreakFinishedCB.class, new onAdBreakFinishedListener());
-        bitmovinPlayer.addEventListener((OnAdBreakFinishedListener)bitmovinEventsMap.get(AdBreakFinishedCB.class));
+        bitmovinEventsMap.put(AD_BREAK_FINISHED, new onAdBreakFinishedListener());
+        bitmovinPlayer.addEventListener((OnAdBreakFinishedListener)bitmovinEventsMap.get(AD_BREAK_FINISHED));
 
-        bitmovinEventsMap.put(AdStartedCB.class, new onAdStartedListener());
-        bitmovinPlayer.addEventListener((OnAdStartedListener)bitmovinEventsMap.get(AdStartedCB.class));
+        bitmovinEventsMap.put(AD_STARTED, new onAdStartedListener());
+        bitmovinPlayer.addEventListener((OnAdStartedListener)bitmovinEventsMap.get(AD_STARTED));
 
-        bitmovinEventsMap.put(AdFinishedCB.class, new onAdFinishedListener());
-        bitmovinPlayer.addEventListener((OnAdFinishedListener)bitmovinEventsMap.get(AdFinishedCB.class));
+        bitmovinEventsMap.put(AD_FINISHED, new onAdFinishedListener());
+        bitmovinPlayer.addEventListener((OnAdFinishedListener)bitmovinEventsMap.get(AD_FINISHED));
 
-        bitmovinEventsMap.put(AdErrorCB.class, new onAdErrorListener());
-        bitmovinPlayer.addEventListener((OnAdErrorListener)bitmovinEventsMap.get(AdErrorCB.class));
+        bitmovinEventsMap.put(AD_ERROR, new onAdErrorListener());
+        bitmovinPlayer.addEventListener((OnAdErrorListener)bitmovinEventsMap.get(AD_ERROR));
     }
 
     public void removeListeners() {
@@ -541,24 +602,15 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    public void addUpstreamCallback (Object callback) {
-        if (callback instanceof SourceLoadedCB) {
-            onSourceLoadedListener obj = (onSourceLoadedListener)bitmovinEventsMap.get(SourceLoadedCB.class);
-            obj.on((SourceLoadedCB)callback);
-        } if (callback instanceof ReadyCB) {
-            onSourceLoadedListener obj = (onSourceLoadedListener)bitmovinEventsMap.get(ReadyCB.class);
-            obj.on((SourceLoadedCB)callback);
-        }
+    public void addUpstreamCallback (String eventName, Object callback) {
+
+        UpstreamCallback obj = bitmovinEventsMap.get(eventName);
+        obj.on(callback);
     }
 
-    public void removeUpstreamCallback (Object callback) {
-        if (callback instanceof SourceLoadedCB) {
-            onSourceLoadedListener obj = (onSourceLoadedListener)bitmovinEventsMap.get(SourceLoadedCB.class);
-            obj.off();
-        } if (callback instanceof ReadyCB) {
-            onSourceLoadedListener obj = (onSourceLoadedListener)bitmovinEventsMap.get(ReadyCB.class);
-            obj.off();
-        }
+    public void removeUpstreamCallback (String eventName) {
+        UpstreamCallback obj = bitmovinEventsMap.get(eventName);
+        obj.off();
     }
 
 }
