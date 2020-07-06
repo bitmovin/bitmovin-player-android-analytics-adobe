@@ -1,0 +1,17 @@
+ext {
+    // Versions
+    supportLibraryVersion = '27.1.1'
+    playServicesAdsVersion = '17.1.2'
+    imaSdkVersion = '3.11.3'
+    playServicesCastVersion = '17.0.0'
+    bitmovinPlayerVersion = '2.47.0'
+
+    // Library dependencies
+    supportDependencies = [
+            appCompat        : 'androidx.appcompat:appcompat:1.0.0'
+    ]
+
+    bitmovinPlayerDependencies = [
+            bitmovinPlayer   :         "com.bitmovin.player:playercore:${bitmovinPlayerVersion}"
+    ]
+}
