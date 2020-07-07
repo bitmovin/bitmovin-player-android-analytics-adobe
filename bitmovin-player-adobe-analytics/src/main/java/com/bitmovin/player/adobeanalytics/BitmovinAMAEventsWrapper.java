@@ -1,8 +1,10 @@
 package com.bitmovin.player.adobeanalytics;
 
 import com.adobe.marketing.mobile.Media;
+import com.adobe.marketing.mobile.MediaConstants;
 import com.adobe.marketing.mobile.MediaTracker;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class BitmovinAMAEventsWrapper {
@@ -50,11 +52,104 @@ public class BitmovinAMAEventsWrapper {
         }
     }
 
-    public void trackEvent(Media.Event event,
-                           Map<String, Object> info,
-                           Map<String, String> data) {
+    public void trackBufferStart() {
         if (mediaTracker != null) {
-            mediaTracker.trackEvent(event, info, data);
+            mediaTracker.trackEvent(Media.Event.BufferStart, null, null);
         }
+    }
+
+    public void trackBufferComplete() {
+        if (mediaTracker != null) {
+            mediaTracker.trackEvent(Media.Event.BufferComplete, null, null);
+        }
+    }
+
+    public void trackSeekStart() {
+        if (mediaTracker != null) {
+            mediaTracker.trackEvent(Media.Event.SeekStart, null, null);
+        }
+    }
+
+    public void trackSeekComplete() {
+        if (mediaTracker != null) {
+            mediaTracker.trackEvent(Media.Event.SeekComplete, null, null);
+        }
+    }
+
+    public void trackBitrateChange(Map<String, Object> qoeObject) {
+        if (mediaTracker != null) {
+            this.updateQoEObject(qoeObject);
+            mediaTracker.trackEvent(Media.Event.BitrateChange, null, null);
+        }
+    }
+
+
+    public void trackFullScreenEnter() {
+        if (mediaTracker != null) {
+            HashMap<String, Object> stateObject = Media.createStateObject(MediaConstants.PlayerState.FULLSCREEN);
+            mediaTracker.trackEvent(Media.Event.StateStart, stateObject, null);
+        }
+    }
+
+    public void trackFullScreenLeave() {
+        if (mediaTracker != null) {
+            HashMap<String, Object> stateObject = Media.createStateObject(MediaConstants.PlayerState.FULLSCREEN);
+            mediaTracker.trackEvent(Media.Event.StateEnd, stateObject, null);
+        }
+    }
+
+    public void trackMute() {
+        if (mediaTracker != null) {
+            HashMap<String, Object> stateObject = Media.createStateObject(MediaConstants.PlayerState.MUTE);
+            mediaTracker.trackEvent(Media.Event.StateStart, stateObject, null);
+        }
+    }
+
+    public void trackUnmute() {
+        if (mediaTracker != null) {
+            HashMap<String, Object> stateObject = Media.createStateObject(MediaConstants.PlayerState.MUTE);
+            mediaTracker.trackEvent(Media.Event.StateEnd, stateObject, null);
+        }
+    }
+
+    public void updateCurrentPlayhead(Double time) {
+        if (mediaTracker != null) {
+            mediaTracker.updateCurrentPlayhead(time);
+        }
+    }
+
+    public void updateQoEObject(Map<String, Object> qoeObject) {
+        if (mediaTracker != null) {
+            mediaTracker.updateQoEObject(qoeObject);
+        }
+    }
+
+
+    public HashMap<String, Object> createMediaObject (String name, String mediaId, Double length, String streamType) {
+        return Media.createMediaObject(name,
+                mediaId,
+                length,
+                streamType,
+                Media.MediaType.Video);
+    }
+
+    public HashMap<String, Object> createAdBreakObject (String name, Long position, Double startTime) {
+        return Media.createAdBreakObject(name, position, startTime);
+    }
+
+    public HashMap<String, Object> createAdObject (String name, String adId, Long position, Double duration) {
+        return Media.createAdObject(name, adId, position, duration);
+    }
+
+    public HashMap<String, Object> createChapterObject (String name, Long position, Double duration, Double startTimee) {
+        return Media.createChapterObject(name, position, duration, startTimee);
+    }
+
+    public HashMap<String, Object> createQoeObject (Long bitrate, Double startupTime, Double fps, Long droppedFrames) {
+        return Media.createQoEObject(bitrate, startupTime, fps, droppedFrames);
+    }
+
+    public static HashMap<String, Object> createStateObject (String name) {
+        return Media.createStateObject(name);
     }
 }

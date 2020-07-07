@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity
         // Add BitmovinPlayerView to the layout
         rootView.addView(this.bitmovinPlayerView, 0);
 
-        this.bitmovinAmaObj = new BitmovinAMAImpl(bitmovinPlayerView.getPlayer());
+        this.bitmovinAmaObj = new BitmovinAMAImpl(bitmovinPlayerView.getPlayer(), null);
     }
 
     @Override

@@ -26,6 +26,7 @@ import com.bitmovin.player.api.event.data.StallStartedEvent;
 import com.bitmovin.player.api.event.listener.OnStallEndedListener;
 import com.bitmovin.player.api.event.data.StallEndedEvent;
 import com.bitmovin.player.api.event.listener.OnTimeChangedListener;
+import com.bitmovin.player.api.event.data.TimeChangedEvent;
 import com.bitmovin.player.api.event.listener.OnErrorListener;
 import com.bitmovin.player.api.event.data.ErrorEvent;
 import com.bitmovin.player.api.event.listener.OnPlaybackFinishedListener;
@@ -43,8 +44,11 @@ import com.bitmovin.player.api.event.data.AdStartedEvent;
 import com.bitmovin.player.api.event.listener.OnAdFinishedListener;
 import com.bitmovin.player.api.event.data.AdFinishedEvent;
 import com.bitmovin.player.api.event.listener.OnAdSkippedListener;
+import com.bitmovin.player.api.event.data.AdSkippedEvent;
 import com.bitmovin.player.api.event.listener.OnAdErrorListener;
 import com.bitmovin.player.api.event.data.AdErrorEvent;
+import com.bitmovin.player.api.event.listener.OnVideoPlaybackQualityChangedListener;
+import com.bitmovin.player.api.event.data.VideoPlaybackQualityChangedEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,6 +71,8 @@ public class BitmovinPlayerEventsWrapper {
     public static final String SEEKED_EVENT = "seeked";
     public static final String BUFFERING_STARTED_EVENT = "stallstarted";
     public static final String BUFFERING_ENDED_EVENT = "stallended";
+    public static final String TIME_CHANGED_EVENT = "timechanged";
+    public static final String VIDEO_PLAYBACK_QUALITY_CHANGED_EVENT = "videoplaybackqualitychange";
     public static final String ERROR_EVENT = "error";
     public static final String PLAYBACK_FINISHED_EVENT = "playbackfinished";
     public static final String SOURCE_UNLOADED_EVENT = "sourceunloaded";
@@ -103,20 +109,28 @@ public class BitmovinPlayerEventsWrapper {
         void onPaused (PausedEvent event);
     }
 
-    interface SeekStartedCB {
-        void onSeekStarted (SeekEvent event);
+    interface SeekStartCB {
+        void onSeekStart (SeekEvent event);
     }
 
-    interface SeekEndedCB {
-        void onSeekEnded (SeekedEvent event);
+    interface SeekCompleteCB {
+        void onSeekComplete (SeekedEvent event);
     }
 
-    interface BufferingStartedCB {
-        void onBufferingStarted (StallStartedEvent event);
+    interface BufferStartCB {
+        void onBufferStart (StallStartedEvent event);
     }
 
-    interface BufferingEndedCB {
-        void onBufferingEnded (StallEndedEvent event);
+    interface BufferCompleteCB {
+        void onBufferComplete (StallEndedEvent event);
+    }
+
+    interface TimeChangedCB {
+        void onTimeChanged (TimeChangedEvent event);
+    }
+
+    interface VideoPlaybackQualityChangedCB {
+        void onVideoPlaybackQualityChanged(VideoPlaybackQualityChangedEvent event);
     }
 
     interface ErrorCB {
@@ -175,7 +189,6 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onSourceLoaded(SourceLoadedEvent event) {
-            Log.d(TAG, "onSourceLoaded");
             if (upstreamCB != null) {
                 upstreamCB.onSourceLoaded(event);
             }
@@ -197,7 +210,6 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onReady(ReadyEvent event) {
-            Log.d(TAG, "onReady");
             if (upstreamCB != null) {
                 upstreamCB.onReady(event);
             }
@@ -218,7 +230,6 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onPlay(PlayEvent event) {
-            Log.d(TAG, "onPlay");
             if (upstreamCB != null) {
                 upstreamCB.onPlay(event);
             }
@@ -239,7 +250,6 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onPlaying(PlayingEvent event) {
-            Log.d(TAG, "onPlaying");
             if (upstreamCB != null) {
                 upstreamCB.onPlaying(event);
             }
@@ -260,7 +270,6 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onPaused(PausedEvent event) {
-            Log.d(TAG, "onPaused");
             if (upstreamCB != null) {
                 upstreamCB.onPaused(event);
             }
@@ -269,10 +278,10 @@ public class BitmovinPlayerEventsWrapper {
 
     private class onSeekListener implements OnSeekListener, UpstreamCallback {
 
-        private SeekStartedCB upstreamCB = null;
+        private SeekStartCB upstreamCB = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (SeekStartedCB)callback;
+            upstreamCB = (SeekStartCB)callback;
         }
         @Override
         public void off () {
@@ -281,19 +290,18 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onSeek(SeekEvent event) {
-            Log.d(TAG, "onSeek");
             if (upstreamCB != null) {
-                upstreamCB.onSeekStarted(event);
+                upstreamCB.onSeekStart(event);
             }
         }
     }
 
     private class onSeekedListener implements OnSeekedListener, UpstreamCallback {
 
-        private SeekEndedCB upstreamCB = null;
+        private SeekCompleteCB upstreamCB = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (SeekEndedCB)callback;
+            upstreamCB = (SeekCompleteCB)callback;
         }
         @Override
         public void off () {
@@ -302,19 +310,18 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onSeeked(SeekedEvent event) {
-            Log.d(TAG, "onSeeked");
             if (upstreamCB != null) {
-                upstreamCB.onSeekEnded(event);
+                upstreamCB.onSeekComplete(event);
             }
         }
     }
 
     private class onStallStartedListener implements OnStallStartedListener, UpstreamCallback {
 
-        private BufferingStartedCB upstreamCB = null;
+        private BufferStartCB upstreamCB = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (BufferingStartedCB)callback;
+            upstreamCB = (BufferStartCB)callback;
         }
         @Override
         public void off () {
@@ -323,19 +330,18 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onStallStarted(StallStartedEvent event) {
-            Log.d(TAG, "onStallStarted");
             if (upstreamCB != null) {
-                upstreamCB.onBufferingStarted(event);
+                upstreamCB.onBufferStart(event);
             }
         }
     }
 
     private class onStallEndedListener implements OnStallEndedListener, UpstreamCallback {
 
-        private BufferingEndedCB upstreamCB = null;
+        private BufferCompleteCB upstreamCB = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (BufferingEndedCB)callback;
+            upstreamCB = (BufferCompleteCB)callback;
         }
         @Override
         public void off () {
@@ -344,9 +350,48 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onStallEnded(StallEndedEvent event) {
-            Log.d(TAG, "onStallEnded");
             if (upstreamCB != null) {
-                upstreamCB.onBufferingEnded(event);
+                upstreamCB.onBufferComplete(event);
+            }
+        }
+    }
+
+    private class onTimeChangedListener implements OnTimeChangedListener, UpstreamCallback {
+
+        private TimeChangedCB upstreamCB = null;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (TimeChangedCB)callback;
+        }
+        @Override
+        public void off () {
+            upstreamCB = null;
+        }
+
+        @Override
+        public void onTimeChanged(TimeChangedEvent event) {
+            if (upstreamCB != null) {
+                upstreamCB.onTimeChanged(event);
+            }
+        }
+    }
+
+    private class onVideoPlaybackQualityChangedListener implements OnVideoPlaybackQualityChangedListener, UpstreamCallback {
+
+        private VideoPlaybackQualityChangedCB upstreamCB = null;
+        @Override
+        public void on (Object callback) {
+            upstreamCB = (VideoPlaybackQualityChangedCB)callback;
+        }
+        @Override
+        public void off () {
+            upstreamCB = null;
+        }
+
+        @Override
+        public void onVideoPlaybackQualityChanged(VideoPlaybackQualityChangedEvent event) {
+            if (upstreamCB != null) {
+                upstreamCB.onVideoPlaybackQualityChanged(event);
             }
         }
     }
@@ -365,7 +410,6 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onSourceUnloaded(SourceUnloadedEvent event) {
-            Log.d(TAG, "onSourceLoaded");
             if (upstreamCB != null) {
                 upstreamCB.onSourceUnloaded(event);
             }
@@ -386,7 +430,6 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onError(ErrorEvent event) {
-            Log.d(TAG, "onError");
             if (upstreamCB != null) {
                 upstreamCB.onError(event);
             }
@@ -407,7 +450,6 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onPlaybackFinished(PlaybackFinishedEvent event) {
-            Log.d(TAG, "onPlaybackFinished");
             if (upstreamCB != null) {
                 upstreamCB.onPlaybackFinished(event);
             }
@@ -428,7 +470,6 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onDestroy(DestroyEvent event) {
-            Log.d(TAG, "onDestroy");
             if (upstreamCB != null) {
                 upstreamCB.onPlayerDestroyed(event);
             }
@@ -449,7 +490,6 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onAdBreakStarted(AdBreakStartedEvent event) {
-            Log.d(TAG, "onAdBreakStarted");
             if (upstreamCB != null) {
                 upstreamCB.onAdBreakStarted(event);
             }
@@ -470,7 +510,6 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onAdBreakFinished(AdBreakFinishedEvent event) {
-            Log.d(TAG, "onAdBreakFinished");
             if (upstreamCB != null) {
                 upstreamCB.onAdBreakFinished(event);
             }
@@ -491,7 +530,6 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onAdStarted(AdStartedEvent event) {
-            Log.d(TAG, "onAdStarted");
             if (upstreamCB != null) {
                 upstreamCB.onAdStarted(event);
             }
@@ -512,7 +550,6 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onAdFinished(AdFinishedEvent event) {
-            Log.d(TAG, "onAdFinished");
             if (upstreamCB != null) {
                 upstreamCB.onAdFinished(event);
             }
@@ -533,7 +570,6 @@ public class BitmovinPlayerEventsWrapper {
 
         @Override
         public void onAdError(AdErrorEvent event) {
-            Log.d(TAG, "onAdError");
             if (upstreamCB != null) {
                 upstreamCB.onAdError(event);
             }
@@ -567,6 +603,12 @@ public class BitmovinPlayerEventsWrapper {
 
         bitmovinEventsMap.put(BUFFERING_ENDED_EVENT, new onStallEndedListener());
         bitmovinPlayer.addEventListener((OnStallEndedListener)bitmovinEventsMap.get(BUFFERING_ENDED_EVENT));
+
+        bitmovinEventsMap.put(TIME_CHANGED_EVENT, new onTimeChangedListener());
+        bitmovinPlayer.addEventListener((OnTimeChangedListener)bitmovinEventsMap.get(TIME_CHANGED_EVENT));
+
+        bitmovinEventsMap.put(VIDEO_PLAYBACK_QUALITY_CHANGED_EVENT, new onVideoPlaybackQualityChangedListener());
+        bitmovinPlayer.addEventListener((OnVideoPlaybackQualityChangedListener)bitmovinEventsMap.get(VIDEO_PLAYBACK_QUALITY_CHANGED_EVENT));
 
         bitmovinEventsMap.put(SOURCE_UNLOADED_EVENT, new onSourceUnloadedListener());
         bitmovinPlayer.addEventListener((OnSourceUnloadedListener)bitmovinEventsMap.get(SOURCE_UNLOADED_EVENT));
