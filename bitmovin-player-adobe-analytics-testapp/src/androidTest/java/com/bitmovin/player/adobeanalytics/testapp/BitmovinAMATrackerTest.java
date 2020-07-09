@@ -147,5 +147,5 @@ public class BitmovinAMATrackerTest {
     @Test
     public void destroyTracker() {
     }
-    
+
 }

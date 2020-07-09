@@ -69,8 +69,8 @@ public class MainActivity extends AppCompatActivity
 
         this.bitmovinPlayer = bitmovinPlayerView.getPlayer();
 
-        this.bitmovinAmaTracker = new BitmovinAMATracker();
-        this.bitmovinAmaTracker.createTracker(this.bitmovinPlayer, null);
+        //this.bitmovinAmaTracker = new BitmovinAMATracker();
+        //this.bitmovinAmaTracker.createTracker(this.bitmovinPlayer, null);
     }
 
     @Override

@@ -91,7 +91,7 @@ public class BitmovinAMAEventsWrapper {
         }
     }
 
-    public void trackFullScreenLeave() {
+    public void trackFullScreenExit() {
         if (mediaTracker != null) {
             HashMap<String, Object> stateObject = Media.createStateObject(MediaConstants.PlayerState.FULLSCREEN);
             mediaTracker.trackEvent(Media.Event.StateEnd, stateObject, null);

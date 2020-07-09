@@ -34,17 +34,6 @@ dependencies {
     implementation bitmovinPlayerDependencies.bitmovinPlayer
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
-    implementation "com.google.ads.interactivemedia.v3:interactivemedia:$imaSdkVersion" // only needed if ads are used
-    implementation "com.google.android.gms:play-services-ads:$playServicesAdsVersion" // only needed if ads are used
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0' // only needed if ads are used
-
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    androidTestImplementation 'androidx.test:core:1.2.0'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test:rules:1.2.0'
-
     implementation 'com.adobe.marketing.mobile:sdk-core:1.+'
     implementation 'com.adobe.marketing.mobile:analytics:1.+'
     implementation 'com.adobe.marketing.mobile:media:2.+'
