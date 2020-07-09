@@ -16,7 +16,7 @@ public class BitmovinAMAEventsWrapper {
         mediaTracker = tracker;
     }
 
-    void trackSessionStart(Map<String, Object> mediaInfo, Map<String, String> contextData) {
+    public void trackSessionStart(Map<String, Object> mediaInfo, Map<String, String> contextData) {
         if (mediaTracker != null) {
             mediaTracker.trackSessionStart(mediaInfo, contextData);
         }

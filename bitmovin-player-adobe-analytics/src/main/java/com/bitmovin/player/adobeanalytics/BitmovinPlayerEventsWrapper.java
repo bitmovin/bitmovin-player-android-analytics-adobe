@@ -640,7 +640,9 @@ public class BitmovinPlayerEventsWrapper {
 
     public void removeListeners() {
         for (Map.Entry mapElement : bitmovinEventsMap.entrySet()) {
-            bitmovinPlayer.removeEventListener((EventListener)mapElement.getValue());
+            EventListener listener = (EventListener) mapElement.getValue();
+            ((UpstreamCallback) listener).off();
+            bitmovinPlayer.removeEventListener(listener);
         }
     }
 

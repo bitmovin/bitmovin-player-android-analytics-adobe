@@ -1,0 +1,17 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.bitmovin.player">
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
+    <application
+            android:usesCleartextTraffic="true">
+
+        <uses-library android:name="android.test.base"
+                      android:required="false" />
+        <service android:name="com.bitmovin.player.helper.ParcelableDownloadService"/>
+
+        <meta-data
+                android:name="com.google.android.gms.ads.APPLICATION_ID"
+                android:value="ca-app-pub-1947310468135304~5859865021"/>
+    </application>
+
+</manifest>
