@@ -7,12 +7,12 @@ import com.adobe.marketing.mobile.MediaTracker;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BitmovinAMAEventsWrapper {
+public class AdobeMediaAnalyticsEventsWrapper {
 
-    private final String TAG = "BitmovinAMAEventsWrapper";
+    private final String TAG = "AdobeMediaAnalyticsEventsWrapper";
     private MediaTracker mediaTracker;
 
-    BitmovinAMAEventsWrapper(MediaTracker tracker) {
+    AdobeMediaAnalyticsEventsWrapper(MediaTracker tracker) {
         mediaTracker = tracker;
     }
 

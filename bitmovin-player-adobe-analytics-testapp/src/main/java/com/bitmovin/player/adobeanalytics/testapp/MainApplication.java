@@ -11,9 +11,7 @@ import com.adobe.marketing.mobile.Lifecycle;
 import com.adobe.marketing.mobile.LoggingMode;
 import com.adobe.marketing.mobile.Media;
 import com.adobe.marketing.mobile.MobileCore;
-//import com.adobe.marketing.mobile.MobileServices;
 import com.adobe.marketing.mobile.Signal;
-//import com.adobe.marketing.mobile.UserProfile;
 
 public class MainApplication extends Application
 {
@@ -29,8 +27,6 @@ public class MainApplication extends Application
             Media.registerExtension();
             Analytics.registerExtension();
             Identity.registerExtension();
-            Lifecycle.registerExtension();
-            Signal.registerExtension();
             MobileCore.start(new AdobeCallback () {
                 @Override
                 public void call(Object o) {

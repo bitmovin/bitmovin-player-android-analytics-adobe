@@ -89,83 +89,83 @@ public class BitmovinPlayerEventsWrapper {
         registerListeners();
     }
 
-    interface SourceLoadedCB {
+    interface SourceLoadedEventHandler {
         void onSourceLoaded (SourceLoadedEvent event);
     }
 
-    interface ReadyCB {
+    interface ReadyEventHandler {
         void onReady (ReadyEvent event);
     }
 
-    interface PlayCB {
+    interface PlayEventHandler {
         void onPlay (PlayEvent event);
     }
 
-    interface PlayingCB {
+    interface PlayingEventHandler {
         void onPlaying (PlayingEvent event);
     }
 
-    interface PausedCB {
+    interface PausedEventHandler {
         void onPaused (PausedEvent event);
     }
 
-    interface SeekStartCB {
+    interface SeekStartEventHandler {
         void onSeekStart (SeekEvent event);
     }
 
-    interface SeekCompleteCB {
+    interface SeekCompleteEventHandler {
         void onSeekComplete (SeekedEvent event);
     }
 
-    interface BufferStartCB {
+    interface BufferStartEventHandler {
         void onBufferStart (StallStartedEvent event);
     }
 
-    interface BufferCompleteCB {
+    interface BufferCompleteEventHandler {
         void onBufferComplete (StallEndedEvent event);
     }
 
-    interface TimeChangedCB {
+    interface TimeChangedEventHandler {
         void onTimeChanged (TimeChangedEvent event);
     }
 
-    interface VideoPlaybackQualityChangedCB {
+    interface VideoPlaybackQualityChangedEventHandler {
         void onVideoPlaybackQualityChanged(VideoPlaybackQualityChangedEvent event);
     }
 
-    interface ErrorCB {
+    interface ErrorEventHandler {
         void onError (ErrorEvent event);
     }
 
-    interface PlaybackFinishedCB {
+    interface PlaybackFinishedEventHandler {
         void onPlaybackFinished (PlaybackFinishedEvent event);
     }
 
-    interface SourceUnloadedCB {
+    interface SourceUnloadedEventHandler {
         void onSourceUnloaded(SourceUnloadedEvent event);
     }
 
-    interface PlayerDestroyedCB {
+    interface PlayerDestroyedEventHandler {
         void onPlayerDestroyed (DestroyEvent event);
     }
 
-    interface AdBreakStartedCB {
+    interface AdBreakStartedEventHandler {
         void onAdBreakStarted (AdBreakStartedEvent event);
     }
 
-    interface AdBreakFinishedCB {
+    interface AdBreakFinishedEventHandler {
         void onAdBreakFinished (AdBreakFinishedEvent event);
     }
 
-    interface AdStartedCB {
+    interface AdStartedEventHandler {
         void onAdStarted (AdStartedEvent event);
     }
 
-    interface AdFinishedCB {
+    interface AdFinishedEventHandler {
         void onAdFinished (AdFinishedEvent event);
     }
 
-    interface AdErrorCB {
+    interface AdErrorEventHandler {
         void onAdError (AdErrorEvent event);
     }
 
@@ -176,21 +176,21 @@ public class BitmovinPlayerEventsWrapper {
 
     private class onSourceLoadedListener implements OnSourceLoadedListener, UpstreamCallback {
 
-        private SourceLoadedCB upstreamCB = null;
+        private SourceLoadedEventHandler upstreamEventHandler = null;
 
         @Override
         public void on (Object callback) {
-            upstreamCB = (SourceLoadedCB)callback;
+            upstreamEventHandler = (SourceLoadedEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onSourceLoaded(SourceLoadedEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onSourceLoaded(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onSourceLoaded(event);
             }
         }
 
@@ -198,380 +198,380 @@ public class BitmovinPlayerEventsWrapper {
 
     private class onReadyListener implements OnReadyListener, UpstreamCallback {
 
-        private ReadyCB upstreamCB = null;
+        private ReadyEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (ReadyCB)callback;
+            upstreamEventHandler = (ReadyEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onReady(ReadyEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onReady(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onReady(event);
             }
         }
     }
 
     private class onPlayListener implements OnPlayListener, UpstreamCallback {
 
-        private PlayCB upstreamCB = null;
+        private PlayEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (PlayCB)callback;
+            upstreamEventHandler = (PlayEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onPlay(PlayEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onPlay(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onPlay(event);
             }
         }
     }
 
     private class onPlayingListener implements OnPlayingListener, UpstreamCallback {
 
-        private PlayingCB upstreamCB = null;
+        private PlayingEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (PlayingCB)callback;
+            upstreamEventHandler = (PlayingEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onPlaying(PlayingEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onPlaying(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onPlaying(event);
             }
         }
     }
 
     private class onPausedListener implements OnPausedListener, UpstreamCallback {
 
-        private PausedCB upstreamCB = null;
+        private PausedEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (PausedCB)callback;
+            upstreamEventHandler = (PausedEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onPaused(PausedEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onPaused(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onPaused(event);
             }
         }
     }
 
     private class onSeekListener implements OnSeekListener, UpstreamCallback {
 
-        private SeekStartCB upstreamCB = null;
+        private SeekStartEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (SeekStartCB)callback;
+            upstreamEventHandler = (SeekStartEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onSeek(SeekEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onSeekStart(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onSeekStart(event);
             }
         }
     }
 
     private class onSeekedListener implements OnSeekedListener, UpstreamCallback {
 
-        private SeekCompleteCB upstreamCB = null;
+        private SeekCompleteEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (SeekCompleteCB)callback;
+            upstreamEventHandler = (SeekCompleteEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onSeeked(SeekedEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onSeekComplete(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onSeekComplete(event);
             }
         }
     }
 
     private class onStallStartedListener implements OnStallStartedListener, UpstreamCallback {
 
-        private BufferStartCB upstreamCB = null;
+        private BufferStartEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (BufferStartCB)callback;
+            upstreamEventHandler = (BufferStartEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onStallStarted(StallStartedEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onBufferStart(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onBufferStart(event);
             }
         }
     }
 
     private class onStallEndedListener implements OnStallEndedListener, UpstreamCallback {
 
-        private BufferCompleteCB upstreamCB = null;
+        private BufferCompleteEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (BufferCompleteCB)callback;
+            upstreamEventHandler = (BufferCompleteEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onStallEnded(StallEndedEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onBufferComplete(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onBufferComplete(event);
             }
         }
     }
 
     private class onTimeChangedListener implements OnTimeChangedListener, UpstreamCallback {
 
-        private TimeChangedCB upstreamCB = null;
+        private TimeChangedEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (TimeChangedCB)callback;
+            upstreamEventHandler = (TimeChangedEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onTimeChanged(TimeChangedEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onTimeChanged(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onTimeChanged(event);
             }
         }
     }
 
     private class onVideoPlaybackQualityChangedListener implements OnVideoPlaybackQualityChangedListener, UpstreamCallback {
 
-        private VideoPlaybackQualityChangedCB upstreamCB = null;
+        private VideoPlaybackQualityChangedEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (VideoPlaybackQualityChangedCB)callback;
+            upstreamEventHandler = (VideoPlaybackQualityChangedEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onVideoPlaybackQualityChanged(VideoPlaybackQualityChangedEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onVideoPlaybackQualityChanged(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onVideoPlaybackQualityChanged(event);
             }
         }
     }
 
     private class onSourceUnloadedListener implements OnSourceUnloadedListener, UpstreamCallback {
 
-        private SourceUnloadedCB upstreamCB = null;
+        private SourceUnloadedEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (SourceUnloadedCB)callback;
+            upstreamEventHandler = (SourceUnloadedEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onSourceUnloaded(SourceUnloadedEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onSourceUnloaded(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onSourceUnloaded(event);
             }
         }
     }
 
     private class onErrorListener implements OnErrorListener, UpstreamCallback {
 
-        private ErrorCB upstreamCB = null;
+        private ErrorEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (ErrorCB)callback;
+            upstreamEventHandler = (ErrorEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onError(ErrorEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onError(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onError(event);
             }
         }
     }
 
     private class onPlaybackFinishedListener implements OnPlaybackFinishedListener, UpstreamCallback {
 
-        private PlaybackFinishedCB upstreamCB = null;
+        private PlaybackFinishedEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (PlaybackFinishedCB)callback;
+            upstreamEventHandler = (PlaybackFinishedEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onPlaybackFinished(PlaybackFinishedEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onPlaybackFinished(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onPlaybackFinished(event);
             }
         }
     }
 
     private class onDestroyListener implements OnDestroyListener, UpstreamCallback {
 
-        private PlayerDestroyedCB upstreamCB = null;
+        private PlayerDestroyedEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (PlayerDestroyedCB)callback;
+            upstreamEventHandler = (PlayerDestroyedEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onDestroy(DestroyEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onPlayerDestroyed(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onPlayerDestroyed(event);
             }
         }
     }
 
     private class onAdBreakStartedListener implements OnAdBreakStartedListener, UpstreamCallback {
 
-        private AdBreakStartedCB upstreamCB = null;
+        private AdBreakStartedEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (AdBreakStartedCB)callback;
+            upstreamEventHandler = (AdBreakStartedEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onAdBreakStarted(AdBreakStartedEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onAdBreakStarted(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onAdBreakStarted(event);
             }
         }
     }
 
     private class onAdBreakFinishedListener implements OnAdBreakFinishedListener, UpstreamCallback {
 
-        private AdBreakFinishedCB upstreamCB = null;
+        private AdBreakFinishedEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (AdBreakFinishedCB)callback;
+            upstreamEventHandler = (AdBreakFinishedEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onAdBreakFinished(AdBreakFinishedEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onAdBreakFinished(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onAdBreakFinished(event);
             }
         }
     }
 
     private class onAdStartedListener implements OnAdStartedListener, UpstreamCallback {
 
-        private AdStartedCB upstreamCB = null;
+        private AdStartedEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (AdStartedCB)callback;
+            upstreamEventHandler = (AdStartedEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onAdStarted(AdStartedEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onAdStarted(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onAdStarted(event);
             }
         }
     }
 
     private class onAdFinishedListener implements OnAdFinishedListener, UpstreamCallback {
 
-        private AdFinishedCB upstreamCB = null;
+        private AdFinishedEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (AdFinishedCB)callback;
+            upstreamEventHandler = (AdFinishedEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onAdFinished(AdFinishedEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onAdFinished(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onAdFinished(event);
             }
         }
     }
 
     private class onAdErrorListener implements OnAdErrorListener, UpstreamCallback {
 
-        private AdErrorCB upstreamCB = null;
+        private AdErrorEventHandler upstreamEventHandler = null;
         @Override
         public void on (Object callback) {
-            upstreamCB = (AdErrorCB)callback;
+            upstreamEventHandler = (AdErrorEventHandler)callback;
         }
         @Override
         public void off () {
-            upstreamCB = null;
+            upstreamEventHandler = null;
         }
 
         @Override
         public void onAdError(AdErrorEvent event) {
-            if (upstreamCB != null) {
-                upstreamCB.onAdError(event);
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onAdError(event);
             }
         }
     }
@@ -638,7 +638,7 @@ public class BitmovinPlayerEventsWrapper {
         bitmovinPlayer.addEventListener((OnAdErrorListener)bitmovinEventsMap.get(AD_ERROR));
     }
 
-    public void removeListeners() {
+    public void removeAllEventHandlers() {
         for (Map.Entry mapElement : bitmovinEventsMap.entrySet()) {
             EventListener listener = (EventListener) mapElement.getValue();
             ((UpstreamCallback) listener).off();
@@ -646,13 +646,12 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    public void addUpstreamCallback (String eventName, Object callback) {
-
+    public void addEventHandler (String eventName, Object callback) {
         UpstreamCallback obj = bitmovinEventsMap.get(eventName);
         obj.on(callback);
     }
 
-    public void removeUpstreamCallback (String eventName) {
+    public void removeEventHandler (String eventName) {
         UpstreamCallback obj = bitmovinEventsMap.get(eventName);
         obj.off();
     }

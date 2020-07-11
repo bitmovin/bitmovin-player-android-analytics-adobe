@@ -1,6 +1,7 @@
 package com.bitmovin.player.adobeanalytics.testapp;
 
 import android.os.Bundle;
+import android.content.Intent;
 import androidx.appcompat.app.AppCompatActivity;
 import android.widget.LinearLayout;
 
@@ -12,21 +13,23 @@ import com.bitmovin.player.config.advertising.AdSource;
 import com.bitmovin.player.config.advertising.AdSourceType;
 import com.bitmovin.player.config.advertising.AdvertisingConfiguration;
 import com.bitmovin.player.config.media.SourceConfiguration;
+import com.bitmovin.player.config.PlaybackConfiguration;
 
-import com.bitmovin.player.adobeanalytics.BitmovinAMATracker;
+import com.bitmovin.player.adobeanalytics.AdobeMediaAnalyticsTracker;
 
 import com.adobe.marketing.mobile.*;
 
 public class MainActivity extends AppCompatActivity
 {
-    // These are IMA Sample Tags from https://developers.google.com/interactive-media-ads/docs/sdks/android/tags
-    private static final String VMAP_AD_SOURCE = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostlongpod&cmsid=496&vid=short_tencue&correlator=";
+    public static final String AUTOPLAY_KEY = "autoplay";
+    public static final String VMAP_KEY = "vmapTag";
 
     public BitmovinPlayerView bitmovinPlayerView;
     public SourceConfiguration bitmovinSourceConfiguration;
-    public PlayerConfiguration bitmovinPlayerConfiguration;
+    public PlaybackConfiguration bitmovinPlaybackConfiguration;
     public AdvertisingConfiguration bitmovinAdConfiguration;
-    public BitmovinAMATracker bitmovinAmaTracker;
+    public PlayerConfiguration bitmovinPlayerConfiguration;
+    public AdobeMediaAnalyticsTracker bitmovinAmaTracker;
     public BitmovinPlayer bitmovinPlayer;
 
     @Override
@@ -36,27 +39,39 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
+        // Get the Intent that started this activity and extract the string
+        Intent intent = getIntent();
+        Boolean autoPlay = intent.getBooleanExtra(MainActivity.AUTOPLAY_KEY, false);
+        String vmapTagUrl = intent.getStringExtra(MainActivity.VMAP_KEY);
+
         // Create a new source configuration
         this.bitmovinSourceConfiguration = new SourceConfiguration();
         // Add a new source item
-        this.bitmovinSourceConfiguration.addSourceItem("https://bitdash-a.akamaihd.net/content/sintel/sintel.mpd");
+        this.bitmovinSourceConfiguration.addSourceItem("https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd");
 
-        // Create AdSources
-        AdSource vmapAdSource = new AdSource(AdSourceType.IMA, VMAP_AD_SOURCE);
-
-        // Setup a pre-roll ad
-        AdItem vmapAdRoll = new AdItem("", vmapAdSource);
-
-        // Add the AdItems to the AdvertisingConfiguration
-        this.bitmovinAdConfiguration = new AdvertisingConfiguration(vmapAdRoll);
+        this.bitmovinPlaybackConfiguration = new PlaybackConfiguration();
+        this.bitmovinPlaybackConfiguration.setAutoplayEnabled(autoPlay);
 
         // Creating a new PlayerConfiguration
         this.bitmovinPlayerConfiguration = new PlayerConfiguration();
         // Assign created SourceConfiguration to the PlayerConfiguration
         this.bitmovinPlayerConfiguration.setSourceConfiguration(bitmovinSourceConfiguration);
-        // Assing the AdvertisingConfiguration to the PlayerConfiguration
-        // All ads in the AdvertisingConfiguration will be scheduled automatically
-        // bitmovinPlayerConfiguration.setAdvertisingConfiguration(advertisingConfiguration);
+        this.bitmovinPlayerConfiguration.setPlaybackConfiguration(bitmovinPlaybackConfiguration);
+
+
+        // Create AdSources
+        if (vmapTagUrl != null) {
+            AdSource vmapAdSource = new AdSource(AdSourceType.IMA, vmapTagUrl);
+
+            // Setup ad
+            AdItem vmapAdRoll = new AdItem("", vmapAdSource);
+
+            // Add the AdItems to the AdvertisingConfiguration
+            this.bitmovinAdConfiguration = new AdvertisingConfiguration(vmapAdRoll);
+            // Assing the AdvertisingConfiguration to the PlayerConfiguration
+            // All ads in the AdvertisingConfiguration will be scheduled automatically
+            this.bitmovinPlayerConfiguration.setAdvertisingConfiguration(this.bitmovinAdConfiguration);
+        }
 
         // Create new BitmovinPlayerView with our PlayerConfiguration
         this.bitmovinPlayerView = new BitmovinPlayerView(this, bitmovinPlayerConfiguration);
@@ -68,9 +83,6 @@ public class MainActivity extends AppCompatActivity
         rootView.addView(this.bitmovinPlayerView, 0);
 
         this.bitmovinPlayer = bitmovinPlayerView.getPlayer();
-
-        //this.bitmovinAmaTracker = new BitmovinAMATracker();
-        //this.bitmovinAmaTracker.createTracker(this.bitmovinPlayer, null);
     }
 
     @Override
