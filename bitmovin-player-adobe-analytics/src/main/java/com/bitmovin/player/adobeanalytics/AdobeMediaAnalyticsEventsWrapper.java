@@ -112,6 +112,36 @@ public class AdobeMediaAnalyticsEventsWrapper {
         }
     }
 
+    public void trackAdBreakStarted(Map<String, Object> adBreakObject) {
+        if (mediaTracker != null) {
+            mediaTracker.trackEvent(Media.Event.AdBreakStart, adBreakObject, null);
+        }
+    }
+
+    public void trackAdBreakComplete() {
+        if (mediaTracker != null) {
+            mediaTracker.trackEvent(Media.Event.AdBreakComplete, null, null);
+        }
+    }
+
+    public void trackAdStarted(Map<String, Object> adObject, Map<String, String> adMetadata) {
+        if (mediaTracker != null) {
+            mediaTracker.trackEvent(Media.Event.AdStart, adObject, adMetadata);
+        }
+    }
+
+    public void trackAdSkip() {
+        if (mediaTracker != null) {
+            mediaTracker.trackEvent(Media.Event.AdSkip, null, null);
+        }
+    }
+
+    public void trackAdComplete() {
+        if (mediaTracker != null) {
+            mediaTracker.trackEvent(Media.Event.AdComplete, null, null);
+        }
+    }
+
     public void updateCurrentPlayhead(Double time) {
         if (mediaTracker != null) {
             mediaTracker.updateCurrentPlayhead(time);

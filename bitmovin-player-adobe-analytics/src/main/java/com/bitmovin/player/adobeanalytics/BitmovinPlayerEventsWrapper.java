@@ -27,6 +27,10 @@ import com.bitmovin.player.api.event.listener.OnStallEndedListener;
 import com.bitmovin.player.api.event.data.StallEndedEvent;
 import com.bitmovin.player.api.event.listener.OnTimeChangedListener;
 import com.bitmovin.player.api.event.data.TimeChangedEvent;
+import com.bitmovin.player.api.event.listener.OnMutedListener;
+import com.bitmovin.player.api.event.data.MutedEvent;
+import com.bitmovin.player.api.event.listener.OnUnmutedListener;
+import com.bitmovin.player.api.event.data.UnmutedEvent;
 import com.bitmovin.player.api.event.listener.OnErrorListener;
 import com.bitmovin.player.api.event.data.ErrorEvent;
 import com.bitmovin.player.api.event.listener.OnPlaybackFinishedListener;
@@ -59,7 +63,7 @@ import java.util.Map;
 public class BitmovinPlayerEventsWrapper {
 
     private BitmovinPlayer bitmovinPlayer;
-    private Map<String, UpstreamCallback> bitmovinEventsMap = new HashMap<String, UpstreamCallback>();
+    private Map<String, EventHandler> bitmovinEventsMap = new HashMap<String, EventHandler>();
     private final String TAG = "BitmovinEventsWrapper";
 
     public static final String SOURCE_LOADED_EVENT = "sourceloaded";
@@ -73,6 +77,8 @@ public class BitmovinPlayerEventsWrapper {
     public static final String BUFFERING_ENDED_EVENT = "stallended";
     public static final String TIME_CHANGED_EVENT = "timechanged";
     public static final String VIDEO_PLAYBACK_QUALITY_CHANGED_EVENT = "videoplaybackqualitychange";
+    public static final String AUDIO_MUTED_EVENT = "audiomuted";
+    public static final String AUDIO_UNMUTED_EVENT = "audiounmuted";
     public static final String ERROR_EVENT = "error";
     public static final String PLAYBACK_FINISHED_EVENT = "playbackfinished";
     public static final String SOURCE_UNLOADED_EVENT = "sourceunloaded";
@@ -81,6 +87,7 @@ public class BitmovinPlayerEventsWrapper {
     public static final String AD_BREAK_FINISHED = "adbreakfinished";
     public static final String AD_STARTED = "adstarted";
     public static final String AD_FINISHED = "adfinished";
+    public static final String AD_SKIPPED = "adskipped";
     public static final String AD_ERROR = "aderror";
 
     BitmovinPlayerEventsWrapper (BitmovinPlayer player) {
@@ -133,6 +140,14 @@ public class BitmovinPlayerEventsWrapper {
         void onVideoPlaybackQualityChanged(VideoPlaybackQualityChangedEvent event);
     }
 
+    interface AudioMutedEventHandler {
+        void onAudioMuted ();
+    }
+
+    interface AudioUnmutedEventHandler {
+        void onAudioUnmuted ();
+    }
+
     interface ErrorEventHandler {
         void onError (ErrorEvent event);
     }
@@ -165,16 +180,20 @@ public class BitmovinPlayerEventsWrapper {
         void onAdFinished (AdFinishedEvent event);
     }
 
+    interface AdSkippedEventHandler {
+        void onAdSkipped (AdSkippedEvent event);
+    }
+
     interface AdErrorEventHandler {
         void onAdError (AdErrorEvent event);
     }
 
-    private interface UpstreamCallback {
+    private interface EventHandler {
         public void on (Object callback);
         public void off ();
     }
 
-    private class onSourceLoadedListener implements OnSourceLoadedListener, UpstreamCallback {
+    private class onSourceLoadedListener implements OnSourceLoadedListener, EventHandler {
 
         private SourceLoadedEventHandler upstreamEventHandler = null;
 
@@ -196,7 +215,7 @@ public class BitmovinPlayerEventsWrapper {
 
     }
 
-    private class onReadyListener implements OnReadyListener, UpstreamCallback {
+    private class onReadyListener implements OnReadyListener, EventHandler {
 
         private ReadyEventHandler upstreamEventHandler = null;
         @Override
@@ -216,7 +235,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onPlayListener implements OnPlayListener, UpstreamCallback {
+    private class onPlayListener implements OnPlayListener, EventHandler {
 
         private PlayEventHandler upstreamEventHandler = null;
         @Override
@@ -236,7 +255,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onPlayingListener implements OnPlayingListener, UpstreamCallback {
+    private class onPlayingListener implements OnPlayingListener, EventHandler {
 
         private PlayingEventHandler upstreamEventHandler = null;
         @Override
@@ -256,7 +275,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onPausedListener implements OnPausedListener, UpstreamCallback {
+    private class onPausedListener implements OnPausedListener, EventHandler {
 
         private PausedEventHandler upstreamEventHandler = null;
         @Override
@@ -276,7 +295,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onSeekListener implements OnSeekListener, UpstreamCallback {
+    private class onSeekListener implements OnSeekListener, EventHandler {
 
         private SeekStartEventHandler upstreamEventHandler = null;
         @Override
@@ -296,7 +315,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onSeekedListener implements OnSeekedListener, UpstreamCallback {
+    private class onSeekedListener implements OnSeekedListener, EventHandler {
 
         private SeekCompleteEventHandler upstreamEventHandler = null;
         @Override
@@ -316,7 +335,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onStallStartedListener implements OnStallStartedListener, UpstreamCallback {
+    private class onStallStartedListener implements OnStallStartedListener, EventHandler {
 
         private BufferStartEventHandler upstreamEventHandler = null;
         @Override
@@ -336,7 +355,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onStallEndedListener implements OnStallEndedListener, UpstreamCallback {
+    private class onStallEndedListener implements OnStallEndedListener, EventHandler {
 
         private BufferCompleteEventHandler upstreamEventHandler = null;
         @Override
@@ -356,7 +375,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onTimeChangedListener implements OnTimeChangedListener, UpstreamCallback {
+    private class onTimeChangedListener implements OnTimeChangedListener, EventHandler {
 
         private TimeChangedEventHandler upstreamEventHandler = null;
         @Override
@@ -376,7 +395,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onVideoPlaybackQualityChangedListener implements OnVideoPlaybackQualityChangedListener, UpstreamCallback {
+    private class onVideoPlaybackQualityChangedListener implements OnVideoPlaybackQualityChangedListener, EventHandler {
 
         private VideoPlaybackQualityChangedEventHandler upstreamEventHandler = null;
         @Override
@@ -396,7 +415,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onSourceUnloadedListener implements OnSourceUnloadedListener, UpstreamCallback {
+    private class onSourceUnloadedListener implements OnSourceUnloadedListener, EventHandler {
 
         private SourceUnloadedEventHandler upstreamEventHandler = null;
         @Override
@@ -416,7 +435,47 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onErrorListener implements OnErrorListener, UpstreamCallback {
+    private class onMutedListener implements OnMutedListener, EventHandler {
+
+        private AudioMutedEventHandler upstreamEventHandler = null;
+        @Override
+        public void on (Object callback) {
+            upstreamEventHandler = (AudioMutedEventHandler)callback;
+        }
+        @Override
+        public void off () {
+            upstreamEventHandler = null;
+        }
+
+        @Override
+        public void onMuted(MutedEvent event) {
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onAudioMuted();
+            }
+        }
+    }
+
+    private class onUnmutedListener implements OnUnmutedListener, EventHandler {
+
+        private AudioUnmutedEventHandler upstreamEventHandler = null;
+        @Override
+        public void on (Object callback) {
+            upstreamEventHandler = (AudioUnmutedEventHandler)callback;
+        }
+        @Override
+        public void off () {
+            upstreamEventHandler = null;
+        }
+
+        @Override
+        public void onUnmuted(UnmutedEvent event) {
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onAudioUnmuted();
+            }
+        }
+    }
+
+    private class onErrorListener implements OnErrorListener, EventHandler {
 
         private ErrorEventHandler upstreamEventHandler = null;
         @Override
@@ -436,7 +495,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onPlaybackFinishedListener implements OnPlaybackFinishedListener, UpstreamCallback {
+    private class onPlaybackFinishedListener implements OnPlaybackFinishedListener, EventHandler {
 
         private PlaybackFinishedEventHandler upstreamEventHandler = null;
         @Override
@@ -456,7 +515,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onDestroyListener implements OnDestroyListener, UpstreamCallback {
+    private class onDestroyListener implements OnDestroyListener, EventHandler {
 
         private PlayerDestroyedEventHandler upstreamEventHandler = null;
         @Override
@@ -476,7 +535,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onAdBreakStartedListener implements OnAdBreakStartedListener, UpstreamCallback {
+    private class onAdBreakStartedListener implements OnAdBreakStartedListener, EventHandler {
 
         private AdBreakStartedEventHandler upstreamEventHandler = null;
         @Override
@@ -496,7 +555,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onAdBreakFinishedListener implements OnAdBreakFinishedListener, UpstreamCallback {
+    private class onAdBreakFinishedListener implements OnAdBreakFinishedListener, EventHandler {
 
         private AdBreakFinishedEventHandler upstreamEventHandler = null;
         @Override
@@ -516,7 +575,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onAdStartedListener implements OnAdStartedListener, UpstreamCallback {
+    private class onAdStartedListener implements OnAdStartedListener, EventHandler {
 
         private AdStartedEventHandler upstreamEventHandler = null;
         @Override
@@ -536,7 +595,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onAdFinishedListener implements OnAdFinishedListener, UpstreamCallback {
+    private class onAdFinishedListener implements OnAdFinishedListener, EventHandler {
 
         private AdFinishedEventHandler upstreamEventHandler = null;
         @Override
@@ -556,7 +615,7 @@ public class BitmovinPlayerEventsWrapper {
         }
     }
 
-    private class onAdErrorListener implements OnAdErrorListener, UpstreamCallback {
+    private class onAdErrorListener implements OnAdErrorListener, EventHandler {
 
         private AdErrorEventHandler upstreamEventHandler = null;
         @Override
@@ -572,6 +631,26 @@ public class BitmovinPlayerEventsWrapper {
         public void onAdError(AdErrorEvent event) {
             if (upstreamEventHandler != null) {
                 upstreamEventHandler.onAdError(event);
+            }
+        }
+    }
+
+    private class onAdSkippedListener implements OnAdSkippedListener, EventHandler {
+
+        private AdSkippedEventHandler upstreamEventHandler = null;
+        @Override
+        public void on (Object callback) {
+            upstreamEventHandler = (AdSkippedEventHandler)callback;
+        }
+        @Override
+        public void off () {
+            upstreamEventHandler = null;
+        }
+
+        @Override
+        public void onAdSkipped(AdSkippedEvent event) {
+            if (upstreamEventHandler != null) {
+                upstreamEventHandler.onAdSkipped(event);
             }
         }
     }
@@ -613,6 +692,12 @@ public class BitmovinPlayerEventsWrapper {
         bitmovinEventsMap.put(SOURCE_UNLOADED_EVENT, new onSourceUnloadedListener());
         bitmovinPlayer.addEventListener((OnSourceUnloadedListener)bitmovinEventsMap.get(SOURCE_UNLOADED_EVENT));
 
+        bitmovinEventsMap.put(AUDIO_MUTED_EVENT, new onMutedListener());
+        bitmovinPlayer.addEventListener((OnMutedListener)bitmovinEventsMap.get(AUDIO_MUTED_EVENT));
+
+        bitmovinEventsMap.put(AUDIO_UNMUTED_EVENT, new onUnmutedListener());
+        bitmovinPlayer.addEventListener((OnUnmutedListener)bitmovinEventsMap.get(AUDIO_UNMUTED_EVENT));
+
         bitmovinEventsMap.put(ERROR_EVENT, new onErrorListener());
         bitmovinPlayer.addEventListener((OnErrorListener)bitmovinEventsMap.get(ERROR_EVENT));
 
@@ -634,6 +719,9 @@ public class BitmovinPlayerEventsWrapper {
         bitmovinEventsMap.put(AD_FINISHED, new onAdFinishedListener());
         bitmovinPlayer.addEventListener((OnAdFinishedListener)bitmovinEventsMap.get(AD_FINISHED));
 
+        bitmovinEventsMap.put(AD_SKIPPED, new onAdSkippedListener());
+        bitmovinPlayer.addEventListener((onAdSkippedListener)bitmovinEventsMap.get(AD_SKIPPED));
+
         bitmovinEventsMap.put(AD_ERROR, new onAdErrorListener());
         bitmovinPlayer.addEventListener((OnAdErrorListener)bitmovinEventsMap.get(AD_ERROR));
     }
@@ -641,18 +729,18 @@ public class BitmovinPlayerEventsWrapper {
     public void removeAllEventHandlers() {
         for (Map.Entry mapElement : bitmovinEventsMap.entrySet()) {
             EventListener listener = (EventListener) mapElement.getValue();
-            ((UpstreamCallback) listener).off();
+            ((EventHandler) listener).off();
             bitmovinPlayer.removeEventListener(listener);
         }
     }
 
     public void addEventHandler (String eventName, Object callback) {
-        UpstreamCallback obj = bitmovinEventsMap.get(eventName);
+        EventHandler obj = bitmovinEventsMap.get(eventName);
         obj.on(callback);
     }
 
     public void removeEventHandler (String eventName) {
-        UpstreamCallback obj = bitmovinEventsMap.get(eventName);
+        EventHandler obj = bitmovinEventsMap.get(eventName);
         obj.off();
     }
 

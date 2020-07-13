@@ -27,6 +27,7 @@ import com.bitmovin.player.api.event.data.AdBreakStartedEvent;
 import com.bitmovin.player.api.event.data.AdBreakFinishedEvent;
 import com.bitmovin.player.api.event.data.AdStartedEvent;
 import com.bitmovin.player.api.event.data.AdFinishedEvent;
+import com.bitmovin.player.api.event.data.AdSkippedEvent;
 import com.bitmovin.player.api.event.data.AdErrorEvent;
 
 import java.util.HashMap;
@@ -44,6 +45,7 @@ public class AdobeMediaAnalyticsTracker {
     private HashMap<String, String> contextData;
     private HashMap<String, Object> adBreakObject;
     private HashMap<String, Object> adObject;
+    private Long activeAdPosition = 0L;
 
     public interface AdobeMediaAnalyticsDataOverrides {
         HashMap<String, String> contextDataOverride (BitmovinPlayer player);
@@ -57,7 +59,8 @@ public class AdobeMediaAnalyticsTracker {
             BitmovinPlayerEventsWrapper.BufferStartEventHandler, BitmovinPlayerEventsWrapper.BufferCompleteEventHandler, BitmovinPlayerEventsWrapper.TimeChangedEventHandler,
             BitmovinPlayerEventsWrapper.ErrorEventHandler, BitmovinPlayerEventsWrapper.SourceUnloadedEventHandler, BitmovinPlayerEventsWrapper.PlayerDestroyedEventHandler,
             BitmovinPlayerEventsWrapper.VideoPlaybackQualityChangedEventHandler, BitmovinPlayerEventsWrapper.AdBreakStartedEventHandler, BitmovinPlayerEventsWrapper.AdBreakFinishedEventHandler,
-            BitmovinPlayerEventsWrapper.AdStartedEventHandler, BitmovinPlayerEventsWrapper.AdFinishedEventHandler, BitmovinPlayerEventsWrapper.AdErrorEventHandler {
+            BitmovinPlayerEventsWrapper.AdStartedEventHandler, BitmovinPlayerEventsWrapper.AdFinishedEventHandler,  BitmovinPlayerEventsWrapper.AdSkippedEventHandler,
+            BitmovinPlayerEventsWrapper.AdErrorEventHandler, BitmovinPlayerEventsWrapper.AudioMutedEventHandler, BitmovinPlayerEventsWrapper.AudioUnmutedEventHandler {
 
         private BitmovinPlayer bitmovinPlayer;
 
@@ -97,21 +100,20 @@ public class AdobeMediaAnalyticsTracker {
                     bitmovinPlayer.isLive()? MediaConstants.StreamType.LIVE:MediaConstants.StreamType.VOD);
 
             bitmovinAdobeEventsObj.trackSessionStart(mediaObject, contextData);
+
+            // remove PLAY_EVENT handler to avoid sending duplicate sessionStart events
             bitmovinPlayerEventsObj.removeEventHandler(BitmovinPlayerEventsWrapper.PLAY_EVENT);
+
+            // add PLAYBACK_FINISHED_EVENT to when a session is started successfully
+            // this is required as same will be removed after receiving PLAYBACK_FINISHED_EVENT
+            // but will be required again for playback reload case after finished ones
+            bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.PLAYBACK_FINISHED_EVENT, bitmovinPlayerEventHandler);
         }
 
         @Override
         public void onPlaying(PlayingEvent event) {
             Log.d(TAG, "onPlayingEventHandler");
             bitmovinAdobeEventsObj.trackPlay();
-        }
-
-        @Override
-        public void onPlaybackFinished(PlaybackFinishedEvent event) {
-            Log.d(TAG, "onPlaybackFinishedEventHandler");
-
-            bitmovinAdobeEventsObj.trackComplete();
-            bitmovinAdobeEventsObj.trackSessionEnd();
         }
 
         @Override
@@ -135,25 +137,6 @@ public class AdobeMediaAnalyticsTracker {
         }
 
         @Override
-        public void onError(ErrorEvent event) {
-            Log.d(TAG, "onError");
-
-            bitmovinAdobeEventsObj.trackError(event.getMessage());
-        }
-
-        @Override
-        public void onSourceUnloaded(SourceUnloadedEvent event) {
-            Log.d(TAG, "onSourceUnloaded");
-            bitmovinAdobeEventsObj.trackSessionEnd();
-        }
-
-        @Override
-        public void onPlayerDestroyed(DestroyEvent event) {
-            Log.d(TAG, "onPlayerDestroyed");
-            bitmovinAdobeEventsObj.trackSessionEnd();
-        }
-
-        @Override
         public void onTimeChanged(TimeChangedEvent event) {
             Log.d(TAG, "onTimeChanged");
             bitmovinAdobeEventsObj.updateCurrentPlayhead(event.getTime());
@@ -174,29 +157,100 @@ public class AdobeMediaAnalyticsTracker {
         @Override
         public void onVideoPlaybackQualityChanged(VideoPlaybackQualityChangedEvent event) {
             Log.d(TAG, "onVideoPlaybackQualityChanged");
-            HashMap<String, Object> qoeObject = Media.createQoEObject(event.getNewVideoQuality().getBitrate(), 0, event.getNewVideoQuality().getFrameRate(), bitmovinPlayer.getDroppedVideoFrames());
+            Long bitrate = Long.valueOf(event.getNewVideoQuality().getBitrate());
+            Long droppedVideoFrames = Long.valueOf(bitmovinPlayer.getDroppedVideoFrames());
+            Double frameRate = Double.valueOf(event.getNewVideoQuality().getFrameRate());
+            HashMap<String, Object> qoeObject = bitmovinAdobeEventsObj.createQoeObject(bitrate, 0.0, frameRate, droppedVideoFrames);
             bitmovinAdobeEventsObj.trackBitrateChange(qoeObject);
+        }
+
+        @Override
+        public void onAudioMuted() {
+            Log.d(TAG, "onAudioMuted");
+
+            bitmovinAdobeEventsObj.trackMute();
+        }
+
+        @Override
+        public void onAudioUnmuted() {
+            Log.d(TAG, "onAudioUnmuted");
+
+            bitmovinAdobeEventsObj.trackUnmute();
+        }
+
+        @Override
+        public void onError(ErrorEvent event) {
+            Log.d(TAG, "onError");
+
+            bitmovinAdobeEventsObj.trackError(event.getMessage());
+        }
+
+        @Override
+        public void onPlaybackFinished(PlaybackFinishedEvent event) {
+            Log.d(TAG, "onPlaybackFinishedEventHandler");
+
+            bitmovinAdobeEventsObj.trackComplete();
+
+            // remove PLAY_EVENT handler to avoid sending duplicate complete events
+            bitmovinPlayerEventsObj.removeEventHandler(BitmovinPlayerEventsWrapper.PLAYBACK_FINISHED_EVENT);
+        }
+
+        @Override
+        public void onSourceUnloaded(SourceUnloadedEvent event) {
+            Log.d(TAG, "onSourceUnloaded");
+            bitmovinAdobeEventsObj.trackSessionEnd();
+        }
+
+        @Override
+        public void onPlayerDestroyed(DestroyEvent event) {
+            Log.d(TAG, "onPlayerDestroyed");
+            bitmovinAdobeEventsObj.trackSessionEnd();
         }
 
         @Override
         public void onAdBreakStarted (AdBreakStartedEvent event) {
             Log.d(TAG, "onAdBreakStarted");
+            String adBreakId = event.getAdBreak().getId();
+            Double adBreakStartTime = event.getAdBreak().getScheduleTime();
+            adBreakObject = bitmovinAdobeEventsObj.createAdBreakObject(adBreakId, 1L, adBreakStartTime);
+            bitmovinAdobeEventsObj.trackAdBreakStarted(adBreakObject);
+            activeAdPosition = 0L;
 
+            // remove TIME_CHANGED handler to avoid sending play head updates during Ad playback
+            bitmovinPlayerEventsObj.removeEventHandler(BitmovinPlayerEventsWrapper.TIME_CHANGED_EVENT);
         }
 
         @Override
         public void onAdBreakFinished (AdBreakFinishedEvent event) {
             Log.d(TAG, "onAdBreakFinished");
+            bitmovinAdobeEventsObj.trackAdBreakComplete();
+            activeAdPosition = 0L;
+
+            // add TIME_CHANGED handler to resume sending play head updates during Main content playback
+            bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.TIME_CHANGED_EVENT, bitmovinPlayerEventHandler);
         }
 
         @Override
         public void onAdStarted (AdStartedEvent event) {
             Log.d(TAG, "onAdStarted");
+            String adName = event.getAd().getMediaFileUrl();
+            String adId = event.getAd().getId();
+            Long adPosition = ++activeAdPosition;
+            Double adLength = Double.valueOf(event.getDuration());
+            adBreakObject = bitmovinAdobeEventsObj.createAdObject(adName, adId, adPosition, adLength);
+            bitmovinAdobeEventsObj.trackAdStarted(adBreakObject, null);
         }
 
         @Override
         public void onAdFinished (AdFinishedEvent event) {
             Log.d(TAG, "onAdFinished");
+            bitmovinAdobeEventsObj.trackAdComplete();
+        }
+
+        @Override
+        public void onAdSkipped (AdSkippedEvent event) {
+            Log.d(TAG, "onAdSkipped");
+            bitmovinAdobeEventsObj.trackAdSkip();
         }
 
         @Override
@@ -247,6 +301,8 @@ public class AdobeMediaAnalyticsTracker {
         this.bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.SEEKED_EVENT, this.bitmovinPlayerEventHandler);
         this.bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.TIME_CHANGED_EVENT, this.bitmovinPlayerEventHandler);
         this.bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.VIDEO_PLAYBACK_QUALITY_CHANGED_EVENT, this.bitmovinPlayerEventHandler);
+        this.bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.AUDIO_MUTED_EVENT, this.bitmovinPlayerEventHandler);
+        this.bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.AUDIO_UNMUTED_EVENT, this.bitmovinPlayerEventHandler);
         this.bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.PLAYBACK_FINISHED_EVENT, this.bitmovinPlayerEventHandler);
         this.bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.ERROR_EVENT, this.bitmovinPlayerEventHandler);
         this.bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.SOURCE_UNLOADED_EVENT, this.bitmovinPlayerEventHandler);
@@ -255,6 +311,7 @@ public class AdobeMediaAnalyticsTracker {
         this.bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.AD_BREAK_FINISHED, this.bitmovinPlayerEventHandler);
         this.bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.AD_STARTED, this.bitmovinPlayerEventHandler);
         this.bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.AD_FINISHED, this.bitmovinPlayerEventHandler);
+        this.bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.AD_SKIPPED, this.bitmovinPlayerEventHandler);
         this.bitmovinPlayerEventsObj.addEventHandler(BitmovinPlayerEventsWrapper.AD_ERROR, this.bitmovinPlayerEventHandler);
     }
 
@@ -273,6 +330,9 @@ public class AdobeMediaAnalyticsTracker {
         bitmovinPlayerEventHandler = null;
         mediaObject = null;
         contextData = null;
+        adBreakObject = null;
+        adObject = null;
+        activeAdPosition = 0L;
     }
 
 }

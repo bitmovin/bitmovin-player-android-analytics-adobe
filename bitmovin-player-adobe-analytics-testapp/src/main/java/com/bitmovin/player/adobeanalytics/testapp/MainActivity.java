@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity
 {
     public static final String AUTOPLAY_KEY = "autoplay";
     public static final String VMAP_KEY = "vmapTag";
+    public static final String SOURCE_KEY = "source";
 
     public BitmovinPlayerView bitmovinPlayerView;
     public SourceConfiguration bitmovinSourceConfiguration;
@@ -43,11 +44,17 @@ public class MainActivity extends AppCompatActivity
         Intent intent = getIntent();
         Boolean autoPlay = intent.getBooleanExtra(MainActivity.AUTOPLAY_KEY, false);
         String vmapTagUrl = intent.getStringExtra(MainActivity.VMAP_KEY);
+        String sourceUrl = intent.getStringExtra(MainActivity.SOURCE_KEY);
 
         // Create a new source configuration
+        String defaultSourceUrl = "https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd";
         this.bitmovinSourceConfiguration = new SourceConfiguration();
         // Add a new source item
-        this.bitmovinSourceConfiguration.addSourceItem("https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd");
+        if (sourceUrl == null) {
+            this.bitmovinSourceConfiguration.addSourceItem(defaultSourceUrl);
+        } else {
+            this.bitmovinSourceConfiguration.addSourceItem(sourceUrl);
+        }
 
         this.bitmovinPlaybackConfiguration = new PlaybackConfiguration();
         this.bitmovinPlaybackConfiguration.setAutoplayEnabled(autoPlay);
