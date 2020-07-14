@@ -12,13 +12,18 @@ import static org.mockito.Mockito.*;
 
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.Matchers;
 
 import com.bitmovin.player.BitmovinPlayer;
+import com.bitmovin.player.api.event.data.AdBreakStartedEvent;
+import com.bitmovin.player.api.event.data.AdStartedEvent;
+import com.bitmovin.player.config.media.SourceItem;
 import com.bitmovin.player.config.quality.VideoQuality;
+import com.bitmovin.player.model.advertising.AdBreak;
 
 import com.bitmovin.player.adobeanalytics.AdobeMediaAnalyticsEventsWrapper;
 import com.bitmovin.player.adobeanalytics.AdobeMediaAnalyticsTracker;
-import com.bitmovin.player.adobeanalytics.AdobeMediaAnalyticsTracker.AdobeMediaAnalyticsDataOverrides;
+import com.bitmovin.player.adobeanalytics.AdobeMediaAnalyticsDataOverride;
 
 import static org.junit.Assert.*;
 import android.content.Intent;
@@ -58,14 +63,17 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
     final Long ADBREAK_START_POSITION = 1L;
     final Long AD_START_POSITION = 1L;
 
-    final private TestAMADataOverrides dataOverrides = new TestAMADataOverrides();
+    final private TestAdobeMediaDataOverride customDataOverride = new TestAdobeMediaDataOverride();
     final AdobeMediaAnalyticsTracker bitmovinAmaTracker = new AdobeMediaAnalyticsTracker();
     Double vodAssetDuration = 0.0d;
 
-    public class TestAMADataOverrides implements AdobeMediaAnalyticsDataOverrides {
+    public class TestAdobeMediaDataOverride extends AdobeMediaAnalyticsDataOverride {
+
+        private Long activeAdBreakPosition = 0L;
+        private Long activeAdPosition = 0L;
 
         @Override
-        public HashMap<String, String> contextDataOverride (BitmovinPlayer player) {
+        public HashMap<String, String> getMediaContextData (BitmovinPlayer player) {
             HashMap<String, String> contextData = new HashMap<String, String>();
             contextData.put("os", "Android");
             contextData.put("version", "9.0");
@@ -73,13 +81,67 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
         }
 
         @Override
-        public String mediaNameOverride (BitmovinPlayer player) {
-            return "testname";
+        public String getMediaName (BitmovinPlayer player, SourceItem activeSourceItem) {
+
+            // return appropriate value for media name
+            String mediaName = activeSourceItem.getDashSource().getUrl();
+            return mediaName;
         }
 
         @Override
-        public String mediaUidOverride (BitmovinPlayer player) {
-            return "testid";
+        public String getMediaUid (BitmovinPlayer player, SourceItem activeSourceItem) {
+            // return appropriate value for media id
+            String mediaId = activeSourceItem.getDashSource().getUrl();
+            return mediaId;
+        }
+
+        @Override
+        public String getAdBreakId (BitmovinPlayer player, AdBreakStartedEvent event) {
+            // reset ad position in adBreak when receiving new adBreak event
+            activeAdPosition = 0L;
+
+            // return appropriate value for adBreak id
+            AdBreak adBreak = event.getAdBreak();
+            String adBreakId = adBreak.getId();
+            return adBreakId;
+        }
+
+        @Override
+        public Long getAdBreakPosition (BitmovinPlayer player, AdBreakStartedEvent event) {
+            // reset ad position in adBreak when receiving new adBreak event
+            activeAdPosition = 0L;
+
+            // return position of AdBreak in the content playback
+            Double scheduledTime = event.getAdBreak().getScheduleTime();
+            if (scheduledTime == 0.0D) {
+                // preroll adBreak
+                activeAdBreakPosition = 1L;
+            } else if (scheduledTime == player.getDuration()) {
+                // postroll adBreak
+                activeAdBreakPosition++;
+            } else {
+                // midroll adBreak
+                activeAdBreakPosition++;
+            }
+            return activeAdBreakPosition;
+        }
+
+        @Override
+        public String getAdName (BitmovinPlayer player, AdStartedEvent event) {
+            // return appropriate value representing Ad name
+            return event.getAd().getMediaFileUrl();
+        }
+
+        @Override
+        public String getAdId (BitmovinPlayer player, AdStartedEvent event) {
+            // return appropriate value representing Ad Id
+            return event.getAd().getId();
+        }
+
+        @Override
+        public Long getAdPosition (BitmovinPlayer player, AdStartedEvent event) {
+            // return position of Ad in Ad break
+            return ++activeAdPosition;
         }
     }
 
@@ -145,7 +207,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
         ActivityScenario<MainActivity> activityScenario = ActivityScenario.launch(MainActivity.class);
         activityScenario.onActivity ( activity -> {
                     try {
-                        bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides);
+                        bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride);
                     } catch (Exception e) {
                         // Expectation is to not receive any exception
                         assertTrue("Received unexpected exception: " + e, false);
@@ -166,7 +228,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
         AdobeMediaAnalyticsEventsWrapper mockAmaEventsWrapper = mock(AdobeMediaAnalyticsEventsWrapper.class);
         ActivityScenario<MainActivity> activityScenario = ActivityScenario.launch(MainActivity.class);
         activityScenario.onActivity ( activity -> {
-            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides, mockAmaEventsWrapper);
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
             activity.bitmovinPlayer.play();
         });
 
@@ -191,7 +253,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
         launchIntent.putExtra(MainActivity.AUTOPLAY_KEY, true);
         ActivityScenario<MainActivity> activityScenario = ActivityScenario.launch(launchIntent);
         activityScenario.onActivity ( activity -> {
-            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides, mockAmaEventsWrapper);
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
         });
 
         verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEMEDIAOBJECT_TIMEOUT).times(1)).createMediaObject(anyString(), anyString(), anyDouble(), anyString());
@@ -212,7 +274,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
         AdobeMediaAnalyticsEventsWrapper mockAmaEventsWrapper = mock(AdobeMediaAnalyticsEventsWrapper.class);
         ActivityScenario<MainActivity> activityScenario = ActivityScenario.launch(MainActivity.class);
         activityScenario.onActivity ( activity -> {
-            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides, mockAmaEventsWrapper);
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
             activity.bitmovinPlayer.play();
         });
 
@@ -258,7 +320,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
         AdobeMediaAnalyticsEventsWrapper mockAmaEventsWrapper = mock(AdobeMediaAnalyticsEventsWrapper.class);
         ActivityScenario<MainActivity> activityScenario = ActivityScenario.launch(MainActivity.class);
         activityScenario.onActivity ( activity -> {
-            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides, mockAmaEventsWrapper);
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
             activity.bitmovinPlayer.play();
         });
 
@@ -294,7 +356,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
         AdobeMediaAnalyticsEventsWrapper mockAmaEventsWrapper = mock(AdobeMediaAnalyticsEventsWrapper.class);
         ActivityScenario<MainActivity> activityScenario = ActivityScenario.launch(MainActivity.class);
         activityScenario.onActivity ( activity -> {
-            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides, mockAmaEventsWrapper);
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
             activity.bitmovinPlayer.play();
         });
 
@@ -331,7 +393,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
         AdobeMediaAnalyticsEventsWrapper mockAmaEventsWrapper = mock(AdobeMediaAnalyticsEventsWrapper.class);
         ActivityScenario<MainActivity> activityScenario = ActivityScenario.launch(MainActivity.class);
         activityScenario.onActivity ( activity -> {
-            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides, mockAmaEventsWrapper);
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
             activity.bitmovinPlayer.play();
         });
 
@@ -368,7 +430,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
         launchIntent.putExtra(MainActivity.SOURCE_KEY, errorSourceUrl);
         ActivityScenario<MainActivity> activityScenario = ActivityScenario.launch(launchIntent);
         activityScenario.onActivity ( activity -> {
-            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides, mockAmaEventsWrapper);
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
             activity.bitmovinPlayer.play();
         });
 
@@ -394,7 +456,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
 
         // start playback and check tracking events
         activityScenario.onActivity ( activity -> {
-            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides, mockAmaEventsWrapper);
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
             activity.bitmovinPlayer.play();
         });
         verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEMEDIAOBJECT_TIMEOUT).times(1)).createMediaObject(anyString(), anyString(), anyDouble(), anyString());
@@ -427,7 +489,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
 
         // start playback and check tracking events
         activityScenario.onActivity ( activity -> {
-            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides, mockAmaEventsWrapper);
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
             activity.bitmovinPlayer.play();
         });
         verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEMEDIAOBJECT_TIMEOUT).times(1)).createMediaObject(anyString(), anyString(), anyDouble(), anyString());
@@ -457,7 +519,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
 
         // start playback and check tracking events
         activityScenario.onActivity ( activity -> {
-            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides, mockAmaEventsWrapper);
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
             activity.bitmovinPlayer.play();
         });
         verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEMEDIAOBJECT_TIMEOUT).times(1)).createMediaObject(anyString(), anyString(), anyDouble(), anyString());
@@ -488,7 +550,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
 
         // start playback and check tracking events
         activityScenario.onActivity ( activity -> {
-            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides, mockAmaEventsWrapper);
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
             activity.bitmovinPlayer.play();
         });
         verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEMEDIAOBJECT_TIMEOUT).times(1)).createMediaObject(anyString(), anyString(), anyDouble(), anyString());
@@ -524,7 +586,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
 
         // start playback and check tracking events
         activityScenario.onActivity ( activity -> {
-            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides, mockAmaEventsWrapper);
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
             activity.bitmovinPlayer.play();
         });
         verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEMEDIAOBJECT_TIMEOUT).times(1)).createMediaObject(anyString(), anyString(), anyDouble(), anyString());
@@ -571,7 +633,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
 
         // start playback and check tracking events
         activityScenario.onActivity ( activity -> {
-            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides, mockAmaEventsWrapper);
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
             activity.bitmovinPlayer.play();
         });
         verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEMEDIAOBJECT_TIMEOUT).times(1)).createMediaObject(anyString(), anyString(), anyDouble(), anyString());
@@ -623,7 +685,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
 
         // start playback and check tracking events
         activityScenario.onActivity ( activity -> {
-            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, dataOverrides, mockAmaEventsWrapper);
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
             activity.bitmovinPlayer.play();
         });
         verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEMEDIAOBJECT_TIMEOUT).times(1)).createMediaObject(anyString(), anyString(), anyDouble(), anyString());
@@ -647,7 +709,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
         verify(mockAmaEventsWrapper, timeout(VERIFY_TRACKSEEKSTART_TIMEOUT).times(1)).trackSeekStart();
         verify(mockAmaEventsWrapper, timeout(VERIFY_TRACKSEEKCOMPLETE_TIMEOUT).times(1)).trackSeekComplete();
 
-        verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEADBREAKOBJECT_TIMEOUT).times(1)).createAdBreakObject(anyString(), eq(ADBREAK_START_POSITION), eq(MIDROLL_ADBREAK_STARTTIME));
+        verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEADBREAKOBJECT_TIMEOUT).times(1)).createAdBreakObject(anyString(), eq(ADBREAK_START_POSITION + 1L), eq(MIDROLL_ADBREAK_STARTTIME));
         verify(mockAmaEventsWrapper, timeout(VERIFY_ADBREAKSTARTED_TIMEOUT).times(1)).trackAdBreakStarted(anyMap());
         verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEADOBJECT_TIMEOUT).times(1)).createAdObject(anyString(), anyString(), eq(AD_START_POSITION), eq(MIDROLL_AD_DURATION));
         verify(mockAmaEventsWrapper, timeout(VERIFY_ADSTARTED_TIMEOUT).times(1)).trackAdStarted(anyMap(), eq(null));
@@ -674,8 +736,9 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
         verify(mockAmaEventsWrapper, timeout(VERIFY_TRACKSEEKCOMPLETE_TIMEOUT).times(1)).trackSeekComplete();
 
         verify(mockAmaEventsWrapper, timeout(VERIFY_TRACKCOMPLETE_TIMEOUT).times(1)).trackComplete();
+        clearInvocations(mockAmaEventsWrapper);
 
-        verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEADBREAKOBJECT_TIMEOUT).times(1)).createAdBreakObject(anyString(), eq(ADBREAK_START_POSITION), eq(vodAssetDuration));
+        verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEADBREAKOBJECT_TIMEOUT).times(1)).createAdBreakObject(anyString(), eq(ADBREAK_START_POSITION + 2L), eq(vodAssetDuration));
         verify(mockAmaEventsWrapper, timeout(VERIFY_ADBREAKSTARTED_TIMEOUT).times(1)).trackAdBreakStarted(anyMap());
         verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEADOBJECT_TIMEOUT).times(1)).createAdObject(anyString(), anyString(), eq(AD_START_POSITION), eq(POSTROLL_AD_DURATION));
         verify(mockAmaEventsWrapper, timeout(VERIFY_ADSTARTED_TIMEOUT).times(1)).trackAdStarted(anyMap(), eq(null));

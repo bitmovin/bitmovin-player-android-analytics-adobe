@@ -6,6 +6,7 @@ import com.adobe.marketing.mobile.Media;
 import com.adobe.marketing.mobile.MediaConstants;
 import com.adobe.marketing.mobile.MediaTracker;
 import com.bitmovin.player.BitmovinPlayer;
+import com.bitmovin.player.config.media.SourceItem;
 import com.bitmovin.player.config.PlayerConfiguration;
 import com.bitmovin.player.config.PlaybackConfiguration;
 import com.bitmovin.player.api.event.data.DestroyEvent;
@@ -36,7 +37,7 @@ public class AdobeMediaAnalyticsTracker {
 
     private final String TAG = "AdobeMediaAnalyticsTracker";
     private BitmovinPlayer bitmovinPlayer;
-    private AdobeMediaAnalyticsDataOverrides amaDataOverride;
+    private AdobeMediaAnalyticsDataOverride adobeEventsDataOverride;
     private MediaTracker mediaTracker;
     private BitmovinPlayerEventsWrapper bitmovinPlayerEventsObj;
     private AdobeMediaAnalyticsEventsWrapper bitmovinAdobeEventsObj;
@@ -45,13 +46,8 @@ public class AdobeMediaAnalyticsTracker {
     private HashMap<String, String> contextData;
     private HashMap<String, Object> adBreakObject;
     private HashMap<String, Object> adObject;
+    private SourceItem activeSourceItem;
     private Long activeAdPosition = 0L;
-
-    public interface AdobeMediaAnalyticsDataOverrides {
-        HashMap<String, String> contextDataOverride (BitmovinPlayer player);
-        String mediaNameOverride (BitmovinPlayer player);
-        String mediaUidOverride (BitmovinPlayer player);
-    }
 
     private class BitmovinPlayerEventHandler implements BitmovinPlayerEventsWrapper.SourceLoadedEventHandler, BitmovinPlayerEventsWrapper.ReadyEventHandler,
             BitmovinPlayerEventsWrapper.PlayEventHandler,  BitmovinPlayerEventsWrapper.PlayingEventHandler, BitmovinPlayerEventsWrapper.PausedEventHandler,
@@ -88,13 +84,14 @@ public class AdobeMediaAnalyticsTracker {
         @Override
         public void onPlay(PlayEvent event) {
             Log.d(TAG, "onPlayEventHandler");
-            String mediaName = "";
-            String mediaId = "";
-            if (amaDataOverride != null) {
-                mediaName = amaDataOverride.mediaNameOverride(bitmovinPlayer);
-                mediaId = amaDataOverride.mediaUidOverride(bitmovinPlayer);
-                contextData = amaDataOverride.contextDataOverride(bitmovinPlayer);
-            }
+
+            // get currently playing souce item
+            PlayerConfiguration playerConfig = bitmovinPlayer.getConfig();
+            activeSourceItem = playerConfig.getSourceItem();
+
+            String mediaName = adobeEventsDataOverride.getMediaName(bitmovinPlayer, activeSourceItem);
+            String mediaId = adobeEventsDataOverride.getMediaUid(bitmovinPlayer, activeSourceItem);
+            contextData = adobeEventsDataOverride.getMediaContextData(bitmovinPlayer);
             mediaObject = bitmovinAdobeEventsObj.createMediaObject(mediaName, mediaId,
                     bitmovinPlayer.getDuration(),
                     bitmovinPlayer.isLive()? MediaConstants.StreamType.LIVE:MediaConstants.StreamType.VOD);
@@ -210,9 +207,11 @@ public class AdobeMediaAnalyticsTracker {
         @Override
         public void onAdBreakStarted (AdBreakStartedEvent event) {
             Log.d(TAG, "onAdBreakStarted");
-            String adBreakId = event.getAdBreak().getId();
+
+            String adBreakId = adobeEventsDataOverride.getAdBreakId(this.bitmovinPlayer, event);
+            Long adBreakPosition = adobeEventsDataOverride.getAdBreakPosition(this.bitmovinPlayer, event);
             Double adBreakStartTime = event.getAdBreak().getScheduleTime();
-            adBreakObject = bitmovinAdobeEventsObj.createAdBreakObject(adBreakId, 1L, adBreakStartTime);
+            adBreakObject = bitmovinAdobeEventsObj.createAdBreakObject(adBreakId, adBreakPosition, adBreakStartTime);
             bitmovinAdobeEventsObj.trackAdBreakStarted(adBreakObject);
             activeAdPosition = 0L;
 
@@ -233,8 +232,9 @@ public class AdobeMediaAnalyticsTracker {
         @Override
         public void onAdStarted (AdStartedEvent event) {
             Log.d(TAG, "onAdStarted");
-            String adName = event.getAd().getMediaFileUrl();
-            String adId = event.getAd().getId();
+
+            String adName = adobeEventsDataOverride.getAdName(this.bitmovinPlayer, event);
+            String adId = adobeEventsDataOverride.getAdId(this.bitmovinPlayer, event);
             Long adPosition = ++activeAdPosition;
             Double adLength = Double.valueOf(event.getDuration());
             adBreakObject = bitmovinAdobeEventsObj.createAdObject(adName, adId, adPosition, adLength);
@@ -259,11 +259,11 @@ public class AdobeMediaAnalyticsTracker {
         }
     }
 
-    public void createTracker(BitmovinPlayer bitmovinPlayer, AdobeMediaAnalyticsDataOverrides dataOverride) {
-        this.createTracker(bitmovinPlayer, dataOverride, null);
+    public void createTracker(BitmovinPlayer bitmovinPlayer, AdobeMediaAnalyticsDataOverride customDataOverride) {
+        this.createTracker(bitmovinPlayer, customDataOverride, null);
     }
 
-    public void createTracker(BitmovinPlayer bitmovinPlayer, AdobeMediaAnalyticsDataOverrides dataOverride, AdobeMediaAnalyticsEventsWrapper eventsWrapper) {
+    public void createTracker(BitmovinPlayer bitmovinPlayer, AdobeMediaAnalyticsDataOverride customDataOverride, AdobeMediaAnalyticsEventsWrapper eventsWrapper) {
         if (bitmovinPlayer == null) {
             throw new IllegalArgumentException("BitmovinPlayer argument cannot be null");
         }
@@ -272,7 +272,11 @@ public class AdobeMediaAnalyticsTracker {
         this.bitmovinPlayer = bitmovinPlayer;
 
         // save the data override object
-        this.amaDataOverride = dataOverride;
+        if (customDataOverride != null) {
+            this.adobeEventsDataOverride = customDataOverride;
+        } else {
+            this.adobeEventsDataOverride = new AdobeMediaAnalyticsDataOverride();
+        }
 
         // instantiate Adobe Media analytics tracker object
         this.mediaTracker = Media.createTracker();
@@ -323,7 +327,7 @@ public class AdobeMediaAnalyticsTracker {
         }
 
         bitmovinPlayer = null;
-        amaDataOverride = null;
+        adobeEventsDataOverride = null;
         mediaTracker = null;
         bitmovinPlayerEventsObj = null;
         bitmovinAdobeEventsObj = null;
@@ -333,6 +337,7 @@ public class AdobeMediaAnalyticsTracker {
         adBreakObject = null;
         adObject = null;
         activeAdPosition = 0L;
+        activeSourceItem = null;
     }
 
 }
