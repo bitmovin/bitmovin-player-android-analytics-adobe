@@ -1,2 +1,2 @@
-include ':basic-ads-sample'
+include ':bitmovin-player-adobe-analytics-testapp'
 include ':bitmovin-player-adobe-analytics'
