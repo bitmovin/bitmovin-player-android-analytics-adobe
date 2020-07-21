@@ -1,4 +1,4 @@
-package com.bitmovin.player.adobeanalytics.testapp;
+package com.bitmovin.player.integration.adobeanalytics.testapp;
 
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
@@ -21,9 +21,9 @@ import com.bitmovin.player.config.media.SourceItem;
 import com.bitmovin.player.config.quality.VideoQuality;
 import com.bitmovin.player.model.advertising.AdBreak;
 
-import com.bitmovin.player.adobeanalytics.AdobeMediaAnalyticsEventsWrapper;
-import com.bitmovin.player.adobeanalytics.AdobeMediaAnalyticsTracker;
-import com.bitmovin.player.adobeanalytics.AdobeMediaAnalyticsDataOverride;
+import com.bitmovin.player.integration.adobeanalytics.AdobeMediaAnalyticsEventsWrapper;
+import com.bitmovin.player.integration.adobeanalytics.AdobeMediaAnalyticsTracker;
+import com.bitmovin.player.integration.adobeanalytics.AdobeMediaAnalyticsDataOverride;
 
 import static org.junit.Assert.*;
 import android.content.Intent;

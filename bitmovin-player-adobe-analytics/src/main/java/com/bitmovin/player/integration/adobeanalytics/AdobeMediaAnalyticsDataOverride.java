@@ -1,4 +1,4 @@
-package com.bitmovin.player.adobeanalytics;
+package com.bitmovin.player.integration.adobeanalytics;
 
 import com.bitmovin.player.BitmovinPlayer;
 import com.bitmovin.player.api.event.data.AdBreakStartedEvent;

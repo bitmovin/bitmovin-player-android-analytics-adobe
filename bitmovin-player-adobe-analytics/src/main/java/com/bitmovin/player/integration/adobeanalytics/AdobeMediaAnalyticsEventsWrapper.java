@@ -1,4 +1,4 @@
-package com.bitmovin.player.adobeanalytics;
+package com.bitmovin.player.integration.adobeanalytics;
 
 import com.adobe.marketing.mobile.Media;
 import com.adobe.marketing.mobile.MediaConstants;
