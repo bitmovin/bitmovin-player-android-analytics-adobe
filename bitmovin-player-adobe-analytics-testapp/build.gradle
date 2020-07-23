@@ -32,11 +32,10 @@ android {
 dependencies {
     implementation supportDependencies.appCompat
     implementation bitmovinPlayerDependencies.bitmovinPlayer
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
-    implementation "com.google.ads.interactivemedia.v3:interactivemedia:$imaSdkVersion" // only needed if ads are used
-    implementation "com.google.android.gms:play-services-ads:$playServicesAdsVersion" // only needed if ads are used
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0' // only needed if ads are used
+    implementation "com.google.ads.interactivemedia.v3:interactivemedia:$imaSdkVersion" // Needed for Ad Support
+    implementation "com.google.android.gms:play-services-ads:$playServicesAdsVersion" // Needed for Ad Support
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0' // Needed for Ad Support
 
     implementation 'com.adobe.marketing.mobile:sdk-core:1.+'
     implementation 'com.adobe.marketing.mobile:analytics:1.+'

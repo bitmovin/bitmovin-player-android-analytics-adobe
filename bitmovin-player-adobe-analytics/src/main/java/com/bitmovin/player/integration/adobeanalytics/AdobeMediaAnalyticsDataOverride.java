@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 public class AdobeMediaAnalyticsDataOverride {
 
-    private Long activeAdBreakPosition = 0L;
+    private long activeAdBreakPosition = 0L;
 
     public HashMap<String, String> getMediaContextData (BitmovinPlayer player) {
         // no context data by default
@@ -30,7 +30,7 @@ public class AdobeMediaAnalyticsDataOverride {
         return event.getAdBreak().getId();
     }
 
-    public Long getAdBreakPosition (BitmovinPlayer player, AdBreakStartedEvent event) {
+    public long getAdBreakPosition (BitmovinPlayer player, AdBreakStartedEvent event) {
         return ++activeAdBreakPosition;
     }
 
@@ -42,8 +42,8 @@ public class AdobeMediaAnalyticsDataOverride {
         return event.getAd().getId();
     }
 
-    public Long getAdPosition (BitmovinPlayer player, AdStartedEvent event) {
-        Long position = Long.valueOf(event.getIndexInQueue());
+    public long getAdPosition (BitmovinPlayer player, AdStartedEvent event) {
+        long position = event.getIndexInQueue();
         return position;
     }
 

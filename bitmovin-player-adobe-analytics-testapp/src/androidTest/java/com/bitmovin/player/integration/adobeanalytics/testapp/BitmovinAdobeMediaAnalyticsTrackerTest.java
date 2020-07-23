@@ -54,23 +54,23 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
     final long VERIFY_ADFINISHED_TIMEOUT = (15 * 1000);
     final long VERIFY_ADSKIPPED_TIMEOUT = (15 * 1000);
     final long VERIFY_ADBREAKFINISHED_TIMEOUT = (1 * 1000);
-    final Double PREROLL_ADBREAK_STARTTIME = 0.0d;
-    final Double MIDROLL_ADBREAK_STARTTIME = 15.0d;
-    final Double PREROLL_AD_DURATION = 10.0d;
-    final Double BUMPER_AD_DURATION = 5.0d;
-    final Double MIDROLL_AD_DURATION = 10.0d;
-    final Double POSTROLL_AD_DURATION = 10.0d;
-    final Long ADBREAK_START_POSITION = 1L;
-    final Long AD_START_POSITION = 1L;
+    final double PREROLL_ADBREAK_STARTTIME = 0.0d;
+    final double MIDROLL_ADBREAK_STARTTIME = 15.0d;
+    final double PREROLL_AD_DURATION = 10.0d;
+    final double BUMPER_AD_DURATION = 5.0d;
+    final double MIDROLL_AD_DURATION = 10.0d;
+    final double POSTROLL_AD_DURATION = 10.0d;
+    final long ADBREAK_START_POSITION = 1L;
+    final long AD_START_POSITION = 1L;
 
     final private TestAdobeMediaDataOverride customDataOverride = new TestAdobeMediaDataOverride();
     final AdobeMediaAnalyticsTracker bitmovinAmaTracker = new AdobeMediaAnalyticsTracker();
-    Double vodAssetDuration = 0.0d;
+    double vodAssetDuration = 0.0d;
 
     public class TestAdobeMediaDataOverride extends AdobeMediaAnalyticsDataOverride {
 
-        private Long activeAdBreakPosition = 0L;
-        private Long activeAdPosition = 0L;
+        private long activeAdBreakPosition = 0L;
+        private long activeAdPosition = 0L;
 
         @Override
         public HashMap<String, String> getMediaContextData (BitmovinPlayer player) {
@@ -107,12 +107,12 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
         }
 
         @Override
-        public Long getAdBreakPosition (BitmovinPlayer player, AdBreakStartedEvent event) {
+        public long getAdBreakPosition (BitmovinPlayer player, AdBreakStartedEvent event) {
             // reset ad position in adBreak when receiving new adBreak event
             activeAdPosition = 0L;
 
             // return position of AdBreak in the content playback
-            Double scheduledTime = event.getAdBreak().getScheduleTime();
+            double scheduledTime = event.getAdBreak().getScheduleTime();
             if (scheduledTime == 0.0D) {
                 // preroll adBreak
                 activeAdBreakPosition = 1L;
@@ -139,7 +139,7 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
         }
 
         @Override
-        public Long getAdPosition (BitmovinPlayer player, AdStartedEvent event) {
+        public long getAdPosition (BitmovinPlayer player, AdStartedEvent event) {
             // return position of Ad in Ad break
             return ++activeAdPosition;
         }

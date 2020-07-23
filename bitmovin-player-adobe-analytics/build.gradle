@@ -4,8 +4,8 @@ apply plugin: 'maven-publish'
 
 def packageName = 'com.bitmovin.player.integration'
 def artifactName = 'adobeanalytics'
-def libraryVersion = '0.1.0'
-def libraryCode = 1
+def libraryVersion = '0.2.0'
+def libraryCode = 2
 
 def artifactory_user = ''
 def artifactory_password = ''

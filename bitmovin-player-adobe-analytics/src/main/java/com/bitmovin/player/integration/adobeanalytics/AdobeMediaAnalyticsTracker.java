@@ -47,7 +47,7 @@ public class AdobeMediaAnalyticsTracker {
     private HashMap<String, Object> adBreakObject;
     private HashMap<String, Object> adObject;
     private SourceItem activeSourceItem;
-    private Long activeAdPosition = 0L;
+    private long activeAdPosition = 0L;
 
     private class BitmovinPlayerEventHandler implements BitmovinPlayerEventsWrapper.SourceLoadedEventHandler, BitmovinPlayerEventsWrapper.ReadyEventHandler,
             BitmovinPlayerEventsWrapper.PlayEventHandler,  BitmovinPlayerEventsWrapper.PlayingEventHandler, BitmovinPlayerEventsWrapper.PausedEventHandler,
@@ -154,9 +154,9 @@ public class AdobeMediaAnalyticsTracker {
         @Override
         public void onVideoPlaybackQualityChanged(VideoPlaybackQualityChangedEvent event) {
             Log.d(TAG, "onVideoPlaybackQualityChanged");
-            Long bitrate = Long.valueOf(event.getNewVideoQuality().getBitrate());
-            Long droppedVideoFrames = Long.valueOf(bitmovinPlayer.getDroppedVideoFrames());
-            Double frameRate = Double.valueOf(event.getNewVideoQuality().getFrameRate());
+            long bitrate = event.getNewVideoQuality().getBitrate();
+            long droppedVideoFrames = bitmovinPlayer.getDroppedVideoFrames();
+            double frameRate = event.getNewVideoQuality().getFrameRate();
             HashMap<String, Object> qoeObject = bitmovinAdobeEventsObj.createQoeObject(bitrate, 0.0, frameRate, droppedVideoFrames);
             bitmovinAdobeEventsObj.trackBitrateChange(qoeObject);
         }
@@ -209,8 +209,8 @@ public class AdobeMediaAnalyticsTracker {
             Log.d(TAG, "onAdBreakStarted");
 
             String adBreakId = adobeEventsDataOverride.getAdBreakId(this.bitmovinPlayer, event);
-            Long adBreakPosition = adobeEventsDataOverride.getAdBreakPosition(this.bitmovinPlayer, event);
-            Double adBreakStartTime = event.getAdBreak().getScheduleTime();
+            long adBreakPosition = adobeEventsDataOverride.getAdBreakPosition(this.bitmovinPlayer, event);
+            double adBreakStartTime = event.getAdBreak().getScheduleTime();
             adBreakObject = bitmovinAdobeEventsObj.createAdBreakObject(adBreakId, adBreakPosition, adBreakStartTime);
             bitmovinAdobeEventsObj.trackAdBreakStarted(adBreakObject);
             activeAdPosition = 0L;
@@ -235,10 +235,10 @@ public class AdobeMediaAnalyticsTracker {
 
             String adName = adobeEventsDataOverride.getAdName(this.bitmovinPlayer, event);
             String adId = adobeEventsDataOverride.getAdId(this.bitmovinPlayer, event);
-            Long adPosition = ++activeAdPosition;
-            Double adLength = Double.valueOf(event.getDuration());
-            adBreakObject = bitmovinAdobeEventsObj.createAdObject(adName, adId, adPosition, adLength);
-            bitmovinAdobeEventsObj.trackAdStarted(adBreakObject, null);
+            long adPosition = ++activeAdPosition;
+            double adLength = event.getDuration();
+            adObject = bitmovinAdobeEventsObj.createAdObject(adName, adId, adPosition, adLength);
+            bitmovinAdobeEventsObj.trackAdStarted(adObject, null);
         }
 
         @Override

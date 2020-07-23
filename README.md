@@ -98,10 +98,10 @@ A brief description of overridable methods can be found below.
 | Method (With Signature)                                                     | Default Value          | Description |
 | --------------------------------------------------------------------------- |:----------------------:|:-----------:|
 | String getAdBreakId (BitmovinPlayer player, AdBreakStartedEvent event)      | generated AdBreakID    | Should return the ID of the current Ad Break|
-| Long getAdBreakPosition (BitmovinPlayer player, AdBreakStartedEvent event)  | index of AdBreak       | Should return index of current adBreak among all Ad Breaks|
+| long getAdBreakPosition (BitmovinPlayer player, AdBreakStartedEvent event)  | index of AdBreak       | Should return index of current adBreak among all Ad Breaks|
 | String getAdName (BitmovinPlayer player, AdStartedEvent event)              | generated AdID         | Should return name of the current Ad|
 | String getAdId (BitmovinPlayer player, AdStartedEvent event)                | generated AdID         | Should return ID of the current Ad|
-| Long getAdPosition (BitmovinPlayer player, AdStartedEvent event)            | index of Ad in AdBreak | Should return index of current Ad in Ad Break|
+| long getAdPosition (BitmovinPlayer player, AdStartedEvent event)            | index of Ad in AdBreak | Should return index of current Ad in Ad Break|
 
 
 ### Cleanup
