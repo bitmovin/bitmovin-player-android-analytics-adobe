@@ -4,6 +4,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/activity_main"
-        tools:context="com.bitmovin.player.adobeanalytics.testapp.MainActivity">
+        tools:context="com.bitmovin.player.integration.adobeanalytics.testapp.MainActivity">
 
 </LinearLayout>

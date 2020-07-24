@@ -1,4 +1,4 @@
-package com.bitmovin.player.adobeanalytics;
+package com.bitmovin.player.integration.adobeanalytics;
 
 import com.adobe.marketing.mobile.Media;
 import com.adobe.marketing.mobile.MediaConstants;
@@ -142,7 +142,7 @@ public class AdobeMediaAnalyticsEventsWrapper {
         }
     }
 
-    public void updateCurrentPlayhead(Double time) {
+    public void updateCurrentPlayhead(double time) {
         if (mediaTracker != null) {
             mediaTracker.updateCurrentPlayhead(time);
         }
@@ -155,7 +155,7 @@ public class AdobeMediaAnalyticsEventsWrapper {
     }
 
 
-    public HashMap<String, Object> createMediaObject (String name, String mediaId, Double length, String streamType) {
+    public HashMap<String, Object> createMediaObject (String name, String mediaId, double length, String streamType) {
         return Media.createMediaObject(name,
                 mediaId,
                 length,
@@ -163,19 +163,19 @@ public class AdobeMediaAnalyticsEventsWrapper {
                 Media.MediaType.Video);
     }
 
-    public HashMap<String, Object> createAdBreakObject (String name, Long position, Double startTime) {
+    public HashMap<String, Object> createAdBreakObject (String name, long position, double startTime) {
         return Media.createAdBreakObject(name, position, startTime);
     }
 
-    public HashMap<String, Object> createAdObject (String name, String adId, Long position, Double duration) {
+    public HashMap<String, Object> createAdObject (String name, String adId, long position, double duration) {
         return Media.createAdObject(name, adId, position, duration);
     }
 
-    public HashMap<String, Object> createChapterObject (String name, Long position, Double duration, Double startTimee) {
-        return Media.createChapterObject(name, position, duration, startTimee);
+    public HashMap<String, Object> createChapterObject (String name, long position, double duration, double startTime) {
+        return Media.createChapterObject(name, position, duration, startTime);
     }
 
-    public HashMap<String, Object> createQoeObject (Long bitrate, Double startupTime, Double fps, Long droppedFrames) {
+    public HashMap<String, Object> createQoeObject (long bitrate, double startupTime, double fps, long droppedFrames) {
         return Media.createQoEObject(bitrate, startupTime, fps, droppedFrames);
     }
 

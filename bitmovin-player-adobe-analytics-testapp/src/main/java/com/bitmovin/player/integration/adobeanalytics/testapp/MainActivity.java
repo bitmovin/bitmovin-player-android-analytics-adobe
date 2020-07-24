@@ -1,4 +1,4 @@
-package com.bitmovin.player.adobeanalytics.testapp;
+package com.bitmovin.player.integration.adobeanalytics.testapp;
 
 import android.os.Bundle;
 import android.content.Intent;
@@ -15,7 +15,7 @@ import com.bitmovin.player.config.advertising.AdvertisingConfiguration;
 import com.bitmovin.player.config.media.SourceConfiguration;
 import com.bitmovin.player.config.PlaybackConfiguration;
 
-import com.bitmovin.player.adobeanalytics.AdobeMediaAnalyticsTracker;
+import com.bitmovin.player.integration.adobeanalytics.AdobeMediaAnalyticsTracker;
 
 import com.adobe.marketing.mobile.*;
 

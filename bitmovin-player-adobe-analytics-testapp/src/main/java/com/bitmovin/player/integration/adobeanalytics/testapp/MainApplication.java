@@ -1,4 +1,4 @@
-package com.bitmovin.player.adobeanalytics.testapp;
+package com.bitmovin.player.integration.adobeanalytics.testapp;
 
 import android.app.Application;
 
@@ -30,7 +30,7 @@ public class MainApplication extends Application
             MobileCore.start(new AdobeCallback () {
                 @Override
                 public void call(Object o) {
-                    MobileCore.configureWithAppID("2e662f4d7a02/f7314e644f8f/launch-98a1c3e547bf-development");
+                    MobileCore.configureWithAppID("your-launch-app-id");
                 }
             });
         } catch (InvalidInitException e) {
