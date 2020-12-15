@@ -30,6 +30,7 @@ import com.bitmovin.player.api.event.data.AdStartedEvent;
 import com.bitmovin.player.api.event.data.AdFinishedEvent;
 import com.bitmovin.player.api.event.data.AdSkippedEvent;
 import com.bitmovin.player.api.event.data.AdErrorEvent;
+import com.bitmovin.player.config.quality.VideoQuality;
 
 import java.util.HashMap;
 
@@ -154,9 +155,11 @@ public class AdobeMediaAnalyticsTracker {
         @Override
         public void onVideoPlaybackQualityChanged(VideoPlaybackQualityChangedEvent event) {
             Log.d(TAG, "onVideoPlaybackQualityChanged");
-            long bitrate = event.getNewVideoQuality().getBitrate();
+            VideoQuality newVideoQuality = event.getNewVideoQuality();
+            long bitrate = (newVideoQuality != null) ? newVideoQuality.getBitrate() : 0;
+            double frameRate = (newVideoQuality != null) ? newVideoQuality.getFrameRate() : 0;
             long droppedVideoFrames = bitmovinPlayer.getDroppedVideoFrames();
-            double frameRate = event.getNewVideoQuality().getFrameRate();
+
             HashMap<String, Object> qoeObject = bitmovinAdobeEventsObj.createQoeObject(bitrate, 0.0, frameRate, droppedVideoFrames);
             bitmovinAdobeEventsObj.trackBitrateChange(qoeObject);
         }
@@ -208,6 +211,11 @@ public class AdobeMediaAnalyticsTracker {
         public void onAdBreakStarted (AdBreakStartedEvent event) {
             Log.d(TAG, "onAdBreakStarted");
 
+            // do not send AdBreak started event if adBreak object is null
+            if (event.getAdBreak() == null) {
+                return;
+            }
+
             String adBreakId = adobeEventsDataOverride.getAdBreakId(this.bitmovinPlayer, event);
             long adBreakPosition = adobeEventsDataOverride.getAdBreakPosition(this.bitmovinPlayer, event);
             double adBreakStartTime = event.getAdBreak().getScheduleTime();
@@ -222,6 +230,12 @@ public class AdobeMediaAnalyticsTracker {
         @Override
         public void onAdBreakFinished (AdBreakFinishedEvent event) {
             Log.d(TAG, "onAdBreakFinished");
+
+            // do not send AdBreak completed event if adBreak object is null
+            if (event.getAdBreak() == null) {
+                return;
+            }
+
             bitmovinAdobeEventsObj.trackAdBreakComplete();
             activeAdPosition = 0L;
 
