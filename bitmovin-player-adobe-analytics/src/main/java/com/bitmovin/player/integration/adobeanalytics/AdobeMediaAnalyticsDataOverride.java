@@ -4,6 +4,8 @@ import com.bitmovin.player.BitmovinPlayer;
 import com.bitmovin.player.api.event.data.AdBreakStartedEvent;
 import com.bitmovin.player.api.event.data.AdStartedEvent;
 import com.bitmovin.player.config.media.SourceItem;
+import com.bitmovin.player.model.advertising.Ad;
+import com.bitmovin.player.model.advertising.AdBreak;
 
 import java.util.HashMap;
 
@@ -27,7 +29,8 @@ public class AdobeMediaAnalyticsDataOverride {
     }
 
     public String getAdBreakId (BitmovinPlayer player, AdBreakStartedEvent event) {
-        return event.getAdBreak().getId();
+        AdBreak adBreak = event.getAdBreak();
+        return ((adBreak != null) ? adBreak.getId() : "");
     }
 
     public long getAdBreakPosition (BitmovinPlayer player, AdBreakStartedEvent event) {
@@ -35,11 +38,13 @@ public class AdobeMediaAnalyticsDataOverride {
     }
 
     public String getAdName (BitmovinPlayer player, AdStartedEvent event) {
-        return event.getAd().getMediaFileUrl();
+        Ad ad = event.getAd();
+        return ((ad != null) ? ad.getMediaFileUrl() : "");
     }
 
     public String getAdId (BitmovinPlayer player, AdStartedEvent event) {
-        return event.getAd().getId();
+        Ad ad = event.getAd();
+        return ((ad != null) ? ad.getId() : "");
     }
 
     public long getAdPosition (BitmovinPlayer player, AdStartedEvent event) {
