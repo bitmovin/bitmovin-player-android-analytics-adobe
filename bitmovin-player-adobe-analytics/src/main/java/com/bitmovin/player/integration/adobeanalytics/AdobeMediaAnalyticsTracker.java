@@ -36,7 +36,7 @@ import java.util.HashMap;
 
 public class AdobeMediaAnalyticsTracker {
 
-    private final String TAG = "AdobeMediaAnalyticsTracker";
+    private final String TAG = "AdobeAnalyticsTracker";
     private BitmovinPlayer bitmovinPlayer;
     private AdobeMediaAnalyticsDataOverride adobeEventsDataOverride;
     private MediaTracker mediaTracker;
