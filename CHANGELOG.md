@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- `BitmovinPlayer` to `3.39.0`
+- Kotlin version to 1.7.0
+- `compileSdkVersion` and `targetSdkVersion` to `33`
 
 ## 1.0.0 - 2020-12-18
 ### Added

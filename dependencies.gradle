@@ -1,10 +1,10 @@
 ext {
     // Versions
     supportLibraryVersion = '27.1.1'
-    playServicesAdsVersion = '19.3.0'
-    imaSdkVersion = '3.19.4'
+    playServicesAdsVersion = '21.2.0'
+    imaSdkVersion = '3.29.0'
     playServicesCastVersion = '17.0.0'
-    bitmovinPlayerVersion = '2.70.1'
+    bitmovinPlayerVersion = '3.39.0'
 
     // Library dependencies
     supportDependencies = [
@@ -12,6 +12,6 @@ ext {
     ]
 
     bitmovinPlayerDependencies = [
-            bitmovinPlayer   :         "com.bitmovin.player:playercore:${bitmovinPlayerVersion}"
+            bitmovinPlayer   :         "com.bitmovin.player:player:${bitmovinPlayerVersion}"
     ]
 }

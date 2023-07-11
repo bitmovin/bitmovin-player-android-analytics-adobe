@@ -1,11 +1,10 @@
 package com.bitmovin.player.integration.adobeanalytics;
 
-import com.bitmovin.player.BitmovinPlayer;
-import com.bitmovin.player.api.event.data.AdBreakStartedEvent;
-import com.bitmovin.player.api.event.data.AdStartedEvent;
-import com.bitmovin.player.config.media.SourceItem;
-import com.bitmovin.player.model.advertising.Ad;
-import com.bitmovin.player.model.advertising.AdBreak;
+import com.bitmovin.player.api.Player;
+import com.bitmovin.player.api.advertising.Ad;
+import com.bitmovin.player.api.advertising.AdBreak;
+import com.bitmovin.player.api.event.PlayerEvent;
+import com.bitmovin.player.api.source.Source;
 
 import java.util.HashMap;
 
@@ -13,43 +12,42 @@ public class AdobeMediaAnalyticsDataOverride {
 
     private long activeAdBreakPosition = 0L;
 
-    public HashMap<String, String> getMediaContextData (BitmovinPlayer player) {
+    public HashMap<String, String> getMediaContextData (Player player) {
         // no context data by default
         return null;
     }
 
-    public String getMediaName (BitmovinPlayer player, SourceItem activeSourceItem) {
+    public String getMediaName (Player player, Source activeSourceItem) {
         // empty media name by default
         return "";
     }
 
-    public String getMediaUid (BitmovinPlayer player, SourceItem activeSourceItem) {
+    public String getMediaUid (Player player, Source activeSourceItem) {
         // empty media Id by default
         return "";
     }
 
-    public String getAdBreakId (BitmovinPlayer player, AdBreakStartedEvent event) {
+    public String getAdBreakId (Player player, PlayerEvent.AdBreakStarted event) {
         AdBreak adBreak = event.getAdBreak();
         return ((adBreak != null) ? adBreak.getId() : "");
     }
 
-    public long getAdBreakPosition (BitmovinPlayer player, AdBreakStartedEvent event) {
+    public long getAdBreakPosition (Player player, PlayerEvent.AdBreakStarted event) {
         return ++activeAdBreakPosition;
     }
 
-    public String getAdName (BitmovinPlayer player, AdStartedEvent event) {
+    public String getAdName (Player player, PlayerEvent.AdStarted event) {
         Ad ad = event.getAd();
         return ((ad != null) ? ad.getMediaFileUrl() : "");
     }
 
-    public String getAdId (BitmovinPlayer player, AdStartedEvent event) {
+    public String getAdId (Player player, PlayerEvent.AdStarted event) {
         Ad ad = event.getAd();
         return ((ad != null) ? ad.getId() : "");
     }
 
-    public long getAdPosition (BitmovinPlayer player, AdStartedEvent event) {
-        long position = event.getIndexInQueue();
-        return position;
+    public long getAdPosition (Player player, PlayerEvent.AdStarted event) {
+        return event.getIndexInQueue();
     }
 
 }

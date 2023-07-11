@@ -1,23 +1,22 @@
 package com.bitmovin.player.integration.adobeanalytics.testapp;
 
-import android.os.Bundle;
 import android.content.Intent;
-import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
 import android.widget.LinearLayout;
 
-import com.bitmovin.player.BitmovinPlayerView;
-import com.bitmovin.player.BitmovinPlayer;
-import com.bitmovin.player.config.PlayerConfiguration;
-import com.bitmovin.player.config.advertising.AdItem;
-import com.bitmovin.player.config.advertising.AdSource;
-import com.bitmovin.player.config.advertising.AdSourceType;
-import com.bitmovin.player.config.advertising.AdvertisingConfiguration;
-import com.bitmovin.player.config.media.SourceConfiguration;
-import com.bitmovin.player.config.PlaybackConfiguration;
-
+import com.bitmovin.player.PlayerView;
+import com.bitmovin.player.api.PlaybackConfig;
+import com.bitmovin.player.api.Player;
+import com.bitmovin.player.api.PlayerConfig;
+import com.bitmovin.player.api.advertising.AdItem;
+import com.bitmovin.player.api.advertising.AdSource;
+import com.bitmovin.player.api.advertising.AdSourceType;
+import com.bitmovin.player.api.advertising.AdvertisingConfig;
+import com.bitmovin.player.api.source.Source;
+import com.bitmovin.player.api.source.SourceConfig;
 import com.bitmovin.player.integration.adobeanalytics.AdobeMediaAnalyticsTracker;
 
-import com.adobe.marketing.mobile.*;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -25,13 +24,13 @@ public class MainActivity extends AppCompatActivity
     public static final String VMAP_KEY = "vmapTag";
     public static final String SOURCE_KEY = "source";
 
-    public BitmovinPlayerView bitmovinPlayerView;
-    public SourceConfiguration bitmovinSourceConfiguration;
-    public PlaybackConfiguration bitmovinPlaybackConfiguration;
-    public AdvertisingConfiguration bitmovinAdConfiguration;
-    public PlayerConfiguration bitmovinPlayerConfiguration;
+    public PlayerView bitmovinPlayerView;
+    public Source bitmovinSource;
+    public PlaybackConfig bitmovinPlaybackConfig;
+    public AdvertisingConfig bitmovinAdConfiguration;
+    public PlayerConfig bitmovinPlayerConfig;
     public AdobeMediaAnalyticsTracker bitmovinAmaTracker;
-    public BitmovinPlayer bitmovinPlayer;
+    public Player bitmovinPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -48,48 +47,44 @@ public class MainActivity extends AppCompatActivity
 
         // Create a new source configuration
         String defaultSourceUrl = "https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd";
-        this.bitmovinSourceConfiguration = new SourceConfiguration();
         // Add a new source item
         if (sourceUrl == null) {
-            this.bitmovinSourceConfiguration.addSourceItem(defaultSourceUrl);
+            this.bitmovinSource = Source.create(SourceConfig.fromUrl(defaultSourceUrl));
         } else {
-            this.bitmovinSourceConfiguration.addSourceItem(sourceUrl);
+            this.bitmovinSource = Source.create(SourceConfig.fromUrl(sourceUrl));
         }
 
-        this.bitmovinPlaybackConfiguration = new PlaybackConfiguration();
-        this.bitmovinPlaybackConfiguration.setAutoplayEnabled(autoPlay);
+        this.bitmovinPlaybackConfig = new PlaybackConfig();
+        this.bitmovinPlaybackConfig.setAutoplayEnabled(autoPlay);
 
-        // Creating a new PlayerConfiguration
-        this.bitmovinPlayerConfiguration = new PlayerConfiguration();
-        // Assign created SourceConfiguration to the PlayerConfiguration
-        this.bitmovinPlayerConfiguration.setSourceConfiguration(bitmovinSourceConfiguration);
-        this.bitmovinPlayerConfiguration.setPlaybackConfiguration(bitmovinPlaybackConfiguration);
+        this.bitmovinPlayerConfig = new PlayerConfig();
+        this.bitmovinPlayerConfig.setPlaybackConfig(bitmovinPlaybackConfig);
 
 
         // Create AdSources
         if (vmapTagUrl != null) {
-            AdSource vmapAdSource = new AdSource(AdSourceType.IMA, vmapTagUrl);
+            AdSource vmapAdSource = new AdSource(AdSourceType.Ima, vmapTagUrl);
 
             // Setup ad
             AdItem vmapAdRoll = new AdItem("", vmapAdSource);
 
             // Add the AdItems to the AdvertisingConfiguration
-            this.bitmovinAdConfiguration = new AdvertisingConfiguration(vmapAdRoll);
+            this.bitmovinAdConfiguration = new AdvertisingConfig(vmapAdRoll);
             // Assing the AdvertisingConfiguration to the PlayerConfiguration
             // All ads in the AdvertisingConfiguration will be scheduled automatically
-            this.bitmovinPlayerConfiguration.setAdvertisingConfiguration(this.bitmovinAdConfiguration);
+            this.bitmovinPlayerConfig.setAdvertisingConfig(this.bitmovinAdConfiguration);
         }
 
-        // Create new BitmovinPlayerView with our PlayerConfiguration
-        this.bitmovinPlayerView = new BitmovinPlayerView(this, bitmovinPlayerConfiguration);
-        this.bitmovinPlayerView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        this.bitmovinPlayer = Player.create(this, this.bitmovinPlayerConfig);
 
+        this.bitmovinPlayerView = new PlayerView(this, this.bitmovinPlayer);
+        this.bitmovinPlayerView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         LinearLayout rootView = (LinearLayout) this.findViewById(R.id.activity_main);
 
         // Add BitmovinPlayerView to the layout
         rootView.addView(this.bitmovinPlayerView, 0);
 
-        this.bitmovinPlayer = bitmovinPlayerView.getPlayer();
+        this.bitmovinPlayer.load(this.bitmovinSource);
     }
 
     @Override
