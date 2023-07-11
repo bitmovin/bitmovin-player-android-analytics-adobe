@@ -72,11 +72,6 @@ public class AdobeMediaAnalyticsTracker {
             Log.d(TAG, "onReadyEventHandler");
             PlayerConfig playerConfig = bitmovinPlayer.getConfig();
             PlaybackConfig playbackConfig = playerConfig.getPlaybackConfig();
-
-            // calling onPlay as this callback will not be triggered for autoPlay case
-            if (playbackConfig.isAutoplayEnabled()) {
-                onPlay(null);
-            }
         }
 
         @Override
