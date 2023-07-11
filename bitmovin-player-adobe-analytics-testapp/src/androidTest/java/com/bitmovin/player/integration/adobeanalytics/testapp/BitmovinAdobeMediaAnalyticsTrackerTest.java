@@ -247,30 +247,29 @@ public class BitmovinAdobeMediaAnalyticsTrackerTest {
         activityScenario.close();
     }
 
-    // TODO: This one is known to fail, investigate why and fix
-//    @Test
-//    public void test_trackSessionStartAutoPlay() {
-//
-//        AdobeMediaAnalyticsEventsWrapper mockAmaEventsWrapper = mock(AdobeMediaAnalyticsEventsWrapper.class);
-//
-//        Intent launchIntent = new Intent(ApplicationProvider.getApplicationContext(), MainActivity.class);
-//        launchIntent.putExtra(MainActivity.AUTOPLAY_KEY, true);
-//        ActivityScenario<MainActivity> activityScenario = ActivityScenario.launch(launchIntent);
-//        activityScenario.onActivity ( activity -> {
-//            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
-//        });
-//
-//        verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEMEDIAOBJECT_TIMEOUT).times(1)).createMediaObject(anyString(), anyString(), anyDouble(), anyString());
-//        verify(mockAmaEventsWrapper, timeout(VERIFY_TRACKSESSIONSTART_TIMEOUT).times(1)).trackSessionStart(anyMap(), anyMap());
-//        verify(mockAmaEventsWrapper, timeout(VERIFY_TRACKPLAY_TIMEOUT).times(1)).trackPlay();
-//        verify(mockAmaEventsWrapper, timeout(VERIFY_UPDATEPLAYHEAD_TIMEOUT).times(VERIFY_UPDATEPLAYHEAD_COUNT)).updateCurrentPlayhead(anyDouble());
-//
-//        activityScenario.onActivity ( activity -> {
-//            activity.bitmovinPlayer.destroy();
-//        });
-//
-//        activityScenario.close();
-//    }
+    @Test
+    public void test_trackSessionStartAutoPlay() {
+
+        AdobeMediaAnalyticsEventsWrapper mockAmaEventsWrapper = mock(AdobeMediaAnalyticsEventsWrapper.class);
+
+        Intent launchIntent = new Intent(ApplicationProvider.getApplicationContext(), MainActivity.class);
+        launchIntent.putExtra(MainActivity.AUTOPLAY_KEY, true);
+        ActivityScenario<MainActivity> activityScenario = ActivityScenario.launch(launchIntent);
+        activityScenario.onActivity ( activity -> {
+            bitmovinAmaTracker.createTracker(activity.bitmovinPlayer, customDataOverride, mockAmaEventsWrapper);
+        });
+
+        verify(mockAmaEventsWrapper, timeout(VERIFY_CREATEMEDIAOBJECT_TIMEOUT).times(1)).createMediaObject(anyString(), anyString(), anyDouble(), anyString());
+        verify(mockAmaEventsWrapper, timeout(VERIFY_TRACKSESSIONSTART_TIMEOUT).times(1)).trackSessionStart(anyMap(), anyMap());
+        verify(mockAmaEventsWrapper, timeout(VERIFY_TRACKPLAY_TIMEOUT).times(1)).trackPlay();
+        verify(mockAmaEventsWrapper, timeout(VERIFY_UPDATEPLAYHEAD_TIMEOUT).times(VERIFY_UPDATEPLAYHEAD_COUNT)).updateCurrentPlayhead(anyDouble());
+
+        activityScenario.onActivity ( activity -> {
+            activity.bitmovinPlayer.destroy();
+        });
+
+        activityScenario.close();
+    }
 
     @Test
     public void test_trackPausePlay() {
