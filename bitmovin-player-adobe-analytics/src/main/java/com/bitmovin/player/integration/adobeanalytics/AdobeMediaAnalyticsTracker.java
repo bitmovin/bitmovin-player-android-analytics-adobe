@@ -28,7 +28,7 @@ public class AdobeMediaAnalyticsTracker {
     private HashMap<String, String> contextData;
     private HashMap<String, Object> adBreakObject;
     private HashMap<String, Object> adObject;
-    private Source activeSourceItem;
+    private Source activeSource;
     private long activeAdPosition = 0L;
 
     private class BitmovinPlayerEventHandler implements
@@ -78,10 +78,10 @@ public class AdobeMediaAnalyticsTracker {
         public void onPlay(PlayerEvent.Play event) {
             Log.d(TAG, "onPlayEventHandler");
 
-            activeSourceItem = bitmovinPlayer.getSource();
+            activeSource = bitmovinPlayer.getSource();
 
-            String mediaName = adobeEventsDataOverride.getMediaName(bitmovinPlayer, activeSourceItem);
-            String mediaId = adobeEventsDataOverride.getMediaUid(bitmovinPlayer, activeSourceItem);
+            String mediaName = adobeEventsDataOverride.getMediaName(bitmovinPlayer, activeSource);
+            String mediaId = adobeEventsDataOverride.getMediaUid(bitmovinPlayer, activeSource);
             contextData = adobeEventsDataOverride.getMediaContextData(bitmovinPlayer);
             mediaObject = bitmovinAdobeEventsObj.createMediaObject(mediaName, mediaId,
                     bitmovinPlayer.getDuration(),
@@ -344,7 +344,7 @@ public class AdobeMediaAnalyticsTracker {
         adBreakObject = null;
         adObject = null;
         activeAdPosition = 0L;
-        activeSourceItem = null;
+        activeSource = null;
     }
 
 }
