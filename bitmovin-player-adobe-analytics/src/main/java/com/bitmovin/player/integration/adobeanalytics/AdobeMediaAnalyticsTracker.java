@@ -30,6 +30,7 @@ public class AdobeMediaAnalyticsTracker {
     private HashMap<String, Object> adObject;
     private Source activeSource;
     private long activeAdPosition = 0L;
+    private Boolean isSessionActive = false;
 
     private class BitmovinPlayerEventHandler implements
             BitmovinPlayerEventsWrapper.SourceLoadedEventHandler,
@@ -65,6 +66,10 @@ public class AdobeMediaAnalyticsTracker {
         @Override
         public void onSourceLoaded(SourceEvent.Loaded event) {
             Log.d(TAG, "onSourceLoadedEventHandler");
+
+            // Event order is not guaranteed, especially between autoplay and manual playback start.
+            // Adding this in a few events which could come first.
+            setUpTrackingIfNoActiveSession();
         }
 
         @Override
@@ -78,24 +83,9 @@ public class AdobeMediaAnalyticsTracker {
         public void onPlay(PlayerEvent.Play event) {
             Log.d(TAG, "onPlayEventHandler");
 
-            activeSource = bitmovinPlayer.getSource();
-
-            String mediaName = adobeEventsDataOverride.getMediaName(bitmovinPlayer, activeSource);
-            String mediaId = adobeEventsDataOverride.getMediaUid(bitmovinPlayer, activeSource);
-            contextData = adobeEventsDataOverride.getMediaContextData(bitmovinPlayer);
-            mediaObject = bitmovinAdobeEventsObj.createMediaObject(mediaName, mediaId,
-                    bitmovinPlayer.getDuration(),
-                    bitmovinPlayer.isLive()? MediaConstants.StreamType.LIVE:MediaConstants.StreamType.VOD);
-
-            bitmovinAdobeEventsObj.trackSessionStart(mediaObject, contextData);
-
-            // remove PLAY_EVENT handler to avoid sending duplicate sessionStart events
-            bitmovinPlayerEventsObj.off(BitmovinPlayerEventsWrapper.PLAY_EVENT);
-
-            // add PLAYBACK_FINISHED_EVENT to when a session is started successfully
-            // this is required as same will be removed after receiving PLAYBACK_FINISHED_EVENT
-            // but will be required again for playback reload case after finished ones
-            bitmovinPlayerEventsObj.on(BitmovinPlayerEventsWrapper.PLAYBACK_FINISHED_EVENT, bitmovinPlayerEventHandler);
+            // Event order is not guaranteed, especially between autoplay and manual playback start.
+            // Adding this in a few events which could come first.
+            setUpTrackingIfNoActiveSession();
         }
 
         @Override
@@ -144,6 +134,10 @@ public class AdobeMediaAnalyticsTracker {
 
         @Override
         public void onVideoPlaybackQualityChanged(PlayerEvent.VideoPlaybackQualityChanged event) {
+            // Event order is not guaranteed, especially between autoplay and manual playback start.
+            // Adding this in a few events which could come first.
+            setUpTrackingIfNoActiveSession();
+
             Log.d(TAG, "onVideoPlaybackQualityChanged");
             VideoQuality newVideoQuality = event.getNewVideoQuality();
             long bitrate = (newVideoQuality != null) ? newVideoQuality.getBitrate() : 0;
@@ -198,6 +192,7 @@ public class AdobeMediaAnalyticsTracker {
             // Hence there is no need to track onPlayerDestroyed separately
             Log.d(TAG, "onSourceUnloaded");
             bitmovinAdobeEventsObj.trackSessionEnd();
+            isSessionActive = false;
         }
 
         @Override
@@ -263,6 +258,31 @@ public class AdobeMediaAnalyticsTracker {
         @Override
         public void onAdError (PlayerEvent.AdError event) {
             Log.d(TAG, "onAdError");
+        }
+
+        public void setUpTrackingIfNoActiveSession() {
+            if (isSessionActive) {
+                return;
+            }
+
+            Log.d(TAG, "Set up tracking session");
+
+            activeSource = bitmovinPlayer.getSource();
+
+            String mediaName = adobeEventsDataOverride.getMediaName(bitmovinPlayer, activeSource);
+            String mediaId = adobeEventsDataOverride.getMediaUid(bitmovinPlayer, activeSource);
+            contextData = adobeEventsDataOverride.getMediaContextData(bitmovinPlayer);
+            mediaObject = bitmovinAdobeEventsObj.createMediaObject(mediaName, mediaId,
+                    bitmovinPlayer.getDuration(),
+                    bitmovinPlayer.isLive()? MediaConstants.StreamType.LIVE:MediaConstants.StreamType.VOD);
+
+            bitmovinAdobeEventsObj.trackSessionStart(mediaObject, contextData);
+            isSessionActive = true;
+
+            // add PLAYBACK_FINISHED_EVENT to when a session is started successfully
+            // this is required as same will be removed after receiving PLAYBACK_FINISHED_EVENT
+            // but will be required again for playback reload case after finished ones
+            bitmovinPlayerEventsObj.on(BitmovinPlayerEventsWrapper.PLAYBACK_FINISHED_EVENT, bitmovinPlayerEventHandler);
         }
     }
 
@@ -345,6 +365,7 @@ public class AdobeMediaAnalyticsTracker {
         adObject = null;
         activeAdPosition = 0L;
         activeSource = null;
+        isSessionActive = false;
     }
 
 }
