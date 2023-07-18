@@ -1,5 +1,5 @@
 # Bitmovin Player Adobe Analytics Integration
-This is an open-source project to enable the use of a third-party component (Abode Video Heartbeat) with the Bitmovin Player Android SDK.
+This is an open-source project to enable the use of a third-party component (Adobe Video Heartbeat) with the Bitmovin Player Android SDK.
 
 ## Maintenance and Update
 This project is not part of a regular maintenance or update schedule. For any update requests, please take a look at the guidance further below.
