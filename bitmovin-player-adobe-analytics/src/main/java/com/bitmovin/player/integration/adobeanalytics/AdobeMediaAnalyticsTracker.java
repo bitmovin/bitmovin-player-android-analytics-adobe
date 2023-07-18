@@ -91,6 +91,11 @@ public class AdobeMediaAnalyticsTracker {
         @Override
         public void onPlaying(PlayerEvent.Playing event) {
             Log.d(TAG, "onPlayingEventHandler");
+
+            // Event order is not guaranteed, especially between autoplay and manual playback start.
+            // Adding this in a few events which could come first.
+            setUpTrackingIfNoActiveSession();
+
             bitmovinAdobeEventsObj.trackPlay();
         }
 
